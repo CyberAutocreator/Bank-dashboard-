@@ -1,409 +1,75 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Your Name — Portfolio & Secure Bank Demo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0f172a; --card:#0b1220; --muted:#9aa4b2; --text:#e2e8f0;
-      --accent:#22c55e; --accent-2:#06b6d4; --radius:12px; --border:rgba(255,255,255,0.06)
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#061023 0%,var(--bg) 60%);color:var(--text);-webkit-font-smoothing:antialiased}
-    a{color:inherit;text-decoration:none}
-    header{max-width:1100px;margin:0 auto;padding:28px 20px;display:flex;align-items:center;justify-content:space-between}
-    nav{display:flex;gap:18px;align-items:center}
-    nav a{color:var(--text);opacity:.9;font-weight:600}
-    nav a:hover{opacity:1}
-    .wrap{max-width:1100px;margin:0 auto;padding:20px}
-    /* Hero / Portfolio styles */
-    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;padding:48px 0}
-    .hero h1{font-size:44px;line-height:1.03;margin:0 0 12px}
-    .hero p{font-size:18px;opacity:.95;margin:0 0 18px}
-    .btn{display:inline-block;background:var(--accent);color:#052e17;padding:12px 16px;border-radius:10px;font-weight:700}
-    .card{background:linear-gradient(180deg,#071224,var(--card));border:1px solid var(--border);border-radius:14px;padding:18px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .section{padding:40px 0}
-    footer{border-top:1px solid #122238;padding:24px 0;margin-top:40px}
-    @media(max-width:900px){.hero{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
-    /* Banking UI shared */
-    .bank-wrap{display:grid;grid-template-columns:420px 1fr;gap:28px}
-    @media(max-width:1100px){.bank-wrap{grid-template-columns:1fr}}
-    .bank-card{background:linear-gradient(180deg,#0f1724,#071226);border-radius:12px;padding:22px;border:1px solid var(--border)}
-    .brand{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#042a2a}
-    .muted{color:var(--muted)}
-    input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#071226;color:var(--text);margin-bottom:10px}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#062b2b;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);padding:9px 12px;border-radius:10px;cursor:pointer}
-    .balances li{display:flex;justify-content:space-between;padding:10px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:8px;border-bottom:1px solid var(--border);font-size:0.92rem}
-    th{color:var(--muted);text-align:left}
-    td.right{text-align:right;color:var(--text)}
-    .modal{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;place-items:center}
-    .modal-card{width:360px;background:#071226;border-radius:12px;padding:16px;border:1px solid var(--border)}
-    .small{font-size:0.88rem;color:var(--muted)}
-    /* Page sections structure */
-    .hidden{display:none}
-  </style>
-</head>
-<body>
-  <header>
-    <div><strong>Your Name</strong></div>
-    <nav>
-      <a href="#work" id="navWork">Work</a>
-      <a href="#about" id="navAbout">About</a>
-      <a href="#contact" id="navContact">Contact</a>
-      <a href="#bank" id="navBank">Bank Demo</a>
-    </nav>
-  </header>
+// Demo state
+let demoState = {
+  balances: {
+    "Checking": 162515673.60,
+    "Premium Checking": 36114594.13,
+    "Savings": 36114594.13,
+    "Family Savings": 36114594.13
+  },
+  tx: [
+    {date:"2025-10-01",account:"Checking",type:"Deposit",desc:"Wire transfer",amt:50000000,bal:162515673.60},
+    {date:"2025-10-15",account:"Premium Checking",type:"Withdrawal",desc:"Property investment",amt:-5000000,bal:31114594.13},
+    {date:"2025-09-20",account:"Family Savings",type:"Withdrawal",desc:"Family expenses",amt:-2000000,bal:34114594.13}
+  ],
+  user: null
+};
 
-  <main class="wrap">
-    <!-- HERO / PORTFOLIO -->
-    <section class="hero">
-      <div>
-        <h1>Building simple things that feel good to use.</h1>
-        <p>I design and develop fast, accessible websites for small businesses and creatives in Nigeria.</p>
-        <a class="btn" href="#contact">Start a project</a>
-      </div>
-      <div class="card">
-        <strong>Currently:</strong>
-        <p class="small">Available for 2 new projects this month. Typical turnaround: 2–3 weeks.</p>
-        <div style="margin-top:12px">
-          <strong>Pro demo:</strong>
-          <p class="small">Secure banking UI demo (client-side encryption + backend-ready integration).</p>
-        </div>
-      </div>
-    </section>
+// Login/Register just unlock dashboard
+document.getElementById('loginBtn').addEventListener('click', ()=>{
+  const usr = document.getElementById('user').value.trim() || "Demo User";
+  demoState.user = usr;
+  document.getElementById('custName').textContent = usr;
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('dashboard').style.display='';
+  renderBalances(); renderTx(); renderChart();
+});
+document.getElementById('registerBtn').addEventListener('click', ()=>{
+  document.getElementById('loginBtn').click(); // same as login
+});
+document.getElementById('biometric').addEventListener('click', ()=>{
+  demoState.user = "biometric.user";
+  document.getElementById('custName').textContent = demoState.user;
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('dashboard').style.display='';
+  renderBalances(); renderTx(); renderChart();
+});
 
-    <section id="work" class="section">
-      <h2>Selected work</h2>
-      <div class="grid-3" style="margin-top:12px">
-        <div class="card">
-          <strong>Marketplace landing</strong>
-          <p class="small">Conversion-focused homepage with lightweight animations.</p>
-        </div>
-        <div class="card">
-          <strong>Restaurant site</strong>
-          <p class="small">Menu + online ordering integration (WhatsApp CTA).</p>
-        </div>
-        <div class="card">
-          <strong>Portfolio</strong>
-          <p class="small">Minimal aesthetic, fast load times, SEO-friendly.</p>
-        </div>
-      </div>
-    </section>
+// Render functions
+function renderBalances(){
+  const mapping = {"Checking":"b-check","Premium Checking":"b-premium","Savings":"b-savings","Family Savings":"b-family"};
+  let total=0;
+  for(const [name,val] of Object.entries(demoState.balances)){
+    document.getElementById(mapping[name]).textContent = formatUSD(val);
+    total+=val;
+  }
+  document.getElementById('b-total').textContent = formatUSD(total);
+}
+function renderTx(){
+  const tbody=document.getElementById('txBody'); tbody.innerHTML="";
+  demoState.tx.slice().reverse().forEach(t=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${t.date}</td><td>${t.account}</td><td>${t.type}</td><td>${t.desc}</td><td class="right">${formatUSD(t.amt)}</td><td class="right">${formatUSD(t.bal)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function renderChart(){
+  const ctx=document.getElementById('balanceChart');
+  if(window.chart) window.chart.destroy();
+  window.chart=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(demoState.balances),datasets:[{data:Object.values(demoState.balances),backgroundColor:['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa']}]},options:{plugins:{legend:{labels:{color:'#cfeff3'}}}}});
+}
+function formatUSD(n){ return Number(n).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
 
-    <section id="about" class="section">
-      <h2>About</h2>
-      <p class="small">I’m a web designer/developer based in Oyo State. I care about clarity, speed, and small details that make a site feel trustworthy.</p>
-    </section>
-
-    <section id="contact" class="section card">
-      <h2>Contact</h2>
-      <p class="small">Tell me about your project and your timeline. I’ll reply within 24 hours.</p>
-      <p><strong>Email:</strong> you@example.com</p>
-      <p><strong>WhatsApp:</strong> +234-000-000-0000</p>
-    </section>
-
-    <!-- BANKING DEMO SECTION -->
-    <section id="bank" class="section">
-      <h2>Secure Bank Demo</h2>
-      <div style="margin-top:12px">
-        <div class="bank-wrap">
-          <!-- Login / Controls -->
-          <div class="bank-card" id="loginCard">
-            <div class="brand">
-              <div class="logo">BI</div>
-              <div>
-                <strong>Bank Interface</strong>
-                <div class="small muted">Advanced secured.</div>
-              </div>
-            </div>
-
-            <h3 style="margin-top:8px">Secured Login</h3>
-            <form id="loginForm" onsubmit="return false;">
-              <label for="user">Username</label>
-              <input id="user" name="user" type="text" placeholder="john.doe" />
-              <label for="pass">Password</label>
-              <div style="display:flex;gap:8px">
-                <input id="pass" name="pass" type="password" placeholder="Enter password" />
-                <button class="btn-ghost" id="togglePass" type="button">Show</button>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-                <label class="small muted"><input id="remember" type="checkbox"/> Remember me</label>
-                <button class="btn-ghost" id="biometric" type="button">Use biometric</button>
-              </div>
-              <div style="margin-top:12px;display:flex;gap:10px">
-                <button class="btn-primary" id="loginBtn" type="button">Login</button>
-                <button class="btn-ghost" id="registerBtn" type="button">Register</button>
-              </div>
-              <div id="loginError" class="small" style="color:#ef4444;display:none;margin-top:8px"></div>
-              <p class="small muted" style="margin-top:12px">Demo: register creates an encrypted vault; login decrypts it with your password.</p>
-            </form>
-          </div>
-
-          <!-- Dashboard -->
-          <div class="bank-card hidden" id="dashboard">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div style="display:flex;gap:12px;align-items:center">
-                  <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#d1f6f2,#bbf0ee);display:grid;place-items:center;color:#034040;font-weight:700">KL</div>
-                  <div>
-                    <div id="custName" style="font-weight:700">Customer</div>
-                    <div class="small muted">Premium customer</div>
-                  </div>
-                </div>
-              </div>
-              <div style="display:flex;gap:8px">
-                <span class="small muted" style="background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px">MFA</span>
-                <span class="small muted" style="background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px">Encrypted</span>
-              </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:12px">
-              <div class="card" style="padding:14px">
-                <h4 style="margin:0 0 8px 0">Account overview</h4>
-                <ul id="balanceList" style="list-style:none;padding:0;margin:0">
-                  <li class="balances"><span class="muted">Checking</span><strong id="b-check">$162,515,673.60</strong></li>
-                  <li class="balances"><span class="muted">Premium Checking</span><strong id="b-premium">$36,114,594.13</strong></li>
-                  <li class="balances"><span class="muted">Savings</span><strong id="b-savings">$36,114,594.13</strong></li>
-                  <li class="balances"><span class="muted">Family Savings</span><strong id="b-family">$36,114,594.13</strong></li>
-                </ul>
-                <div style="margin-top:10px;padding:12px;border-radius:10px;background:linear-gradient(90deg,rgba(34,197,94,0.06),rgba(6,182,212,0.04));border:1px solid rgba(34,197,94,0.1);display:flex;justify-content:space-between;align-items:center">
-                  <div class="muted">Total balance</div><strong id="b-total">$270,859,456.00</strong>
-                </div>
-
-                <div style="display:flex;gap:10px;margin-top:12px">
-                  <button class="btn-primary" id="transferBtn">Transfer funds</button>
-                  <button class="btn-ghost" id="exportBtn">Export</button>
-                  <button class="btn-ghost" id="logoutBtn">Logout</button>
-                </div>
-              </div>
-
-              <div class="card" style="padding:12px">
-                <canvas id="balanceChart" width="320" height="220" aria-label="Account balances chart"></canvas>
-                <p class="small muted" style="margin-top:10px;text-align:center">Distribution by account</p>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:14px">
-              <h4 style="margin:0 0 10px 0">Recent transactions</h4>
-              <div style="max-height:260px;overflow:auto;border-radius:10px">
-                <table>
-                  <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead>
-                  <tbody id="txBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer style="max-width:1100px;margin:0 auto;padding:24px 20px">
-    <p>© <span id="year"></span> Your Name. All rights reserved.</p>
-  </footer>
-
-  <!-- Transfer modal -->
-  <div class="modal" id="transferModal">
-    <div class="modal-card">
-      <h3 style="margin:0 0 10px 0">Transfer funds</h3>
-      <label class="small muted">From</label>
-      <select id="fromAcc"></select>
-      <label class="small muted">To</label>
-      <select id="toAcc"></select>
-      <label class="small muted">Amount (USD)</label>
-      <input id="amt" type="number" min="0" step="0.01" placeholder="0.00" />
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn-primary" id="confirmTransfer">Confirm</button>
-        <button class="btn-ghost" id="cancelTransfer">Cancel</button>
-      </div>
-      <div id="transferError" class="small" style="color:#ef4444;display:none;margin-top:8px"></div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
-    // Quick helpers
-    function el(id){ return document.getElementById(id) }
-    function show(elm){ elm.classList.remove('hidden'); elm.style.display = '' }
-    function hide(elm){ elm.classList.add('hidden'); elm.style.display = 'none' }
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Replace with your backend API URL when ready
-    const API = "https://your-backend.onrender.com"; // <-- replace
-
-    // Demo crypto-backed vault is included in backend plan; this frontend integrates with API endpoints:
-    // /api/register, /api/login, /api/balances, /api/transactions, /api/transfer
-    let token = null;
-    let accountsCache = [];
-
-    // UI elements
-    const loginBtn = el('loginBtn'), registerBtn = el('registerBtn'), biometricBtn = el('biometric'), togglePass = el('togglePass');
-    const loginError = el('loginError'), dashboard = el('dashboard'), loginCard = el('loginCard');
-    const custName = el('custName'), txBody = el('txBody');
-
-    // Chart
-    let chart = null;
-
-    togglePass.addEventListener('click', ()=>{
-      const p = el('pass'); togglePass.textContent = (p.type === 'password' ? (p.type='text','Hide') : (p.type='password','Show'));
-    });
-
-    biometricBtn.addEventListener('click', async ()=>{
-      // demo biometric shortcut — uses a fixed demo pass on frontend; backend should support proper flow
-      const usr = el('user').value.trim() || 'biometric.user';
-      try {
-        await apiRegisterIfMissing(usr, 'biometric-pass');
-        await apiLogin(usr, 'biometric-pass');
-      } catch(e){ loginError.textContent = e.message; loginError.style.display='block' }
-    });
-
-    registerBtn.addEventListener('click', async ()=>{
-      const usr = el('user').value.trim(), pass = el('pass').value.trim();
-      if(!usr || !pass){ loginError.textContent = 'Enter a username and password to register.'; loginError.style.display='block'; return; }
-      try{
-        await apiRegisterIfMissing(usr, pass);
-        loginError.style.display='none';
-        await apiLogin(usr, pass);
-      }catch(e){ loginError.textContent = e.message; loginError.style.display='block' }
-    });
-
-    loginBtn.addEventListener('click', async ()=>{
-      const usr = el('user').value.trim(), pass = el('pass').value.trim();
-      if(!usr || !pass){ loginError.textContent = 'Enter username and password.'; loginError.style.display='block'; return; }
-      try{
-        await apiLogin(usr, pass);
-      }catch(e){ loginError.textContent = e.message; loginError.style.display='block' }
-    });
-
-    async function apiRegisterIfMissing(username, password){
-      // Try register; if already exists, ignore conflict
-      const res = await fetch(API + '/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
-      if(res.ok) return;
-      if(res.status === 409) return; // already exists
-      const body = await res.json().catch(()=>({error:'Registration failed'}));
-      throw new Error(body.error || 'Registration failed');
-    }
-
-    async function apiLogin(username, password){
-      const res = await fetch(API + '/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
-      if(!res.ok){
-        const body = await res.json().catch(()=>({error:'Login failed'}));
-        throw new Error(body.error || 'Login failed');
-      }
-      const data = await res.json();
-      token = data.token;
-      custName.textContent = username;
-      loginError.style.display='none';
-      loginCard.style.display='none';
-      dashboard.style.display='';
-      await loadDashboard();
-    }
-
-    async function loadDashboard(){
-      // balances
-      const balRes = await fetch(API + '/api/balances',{headers:{Authorization:'Bearer '+token}});
-      if(!balRes.ok){ console.error(await balRes.text()); return; }
-      const balJson = await balRes.json();
-      accountsCache = balJson.accounts || [];
-      updateBalancesUI(accountsCache);
-      // transactions
-      const txRes = await fetch(API + '/api/transactions',{headers:{Authorization:'Bearer '+token}});
-      if(txRes.ok){ const txJson = await txRes.json(); renderTx(txJson.transactions || []); }
-      // chart
-      renderChart(accountsCache);
-    }
-
-    function updateBalancesUI(accounts){
-      const mapping = {'Checking':'b-check','Premium Checking':'b-premium','Savings':'b-savings','Family Savings':'b-family'};
-      let total = 0;
-      accounts.forEach(a=>{
-        const el = el(mapping[a.name]);
-        if(el) el.textContent = formatUSD(a.balance);
-        total += Number(a.balance);
-      });
-      el('b-total').textContent = formatUSD(total);
-    }
-
-    function renderTx(txs){
-      txBody.innerHTML = '';
-      txs.slice().reverse().forEach(t=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${new Date(t.date).toISOString().slice(0,10)}</td>
-                        <td>${escapeHtml(t.accountName || t.accountId)}</td>
-                        <td>${escapeHtml(t.type)}</td>
-                        <td>${escapeHtml(t.description)}</td>
-                        <td class="right">${formatUSD(t.amount)}</td>
-                        <td class="right">${formatUSD(t.balanceAfter)}</td>`;
-        txBody.appendChild(tr);
-      });
-    }
-
-    function renderChart(accounts){
-      const ctx = el('balanceChart');
-      if(chart) chart.destroy();
-      chart = new Chart(ctx, {
-        type:'doughnut',
-        data:{
-          labels: accounts.map(a=>a.name),
-          datasets:[{ data: accounts.map(a=>Number(a.balance)), backgroundColor:['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa'], borderColor:'#071226', borderWidth:1 }]
-        },
-        options:{plugins:{legend:{position:'bottom',labels:{color:'#cfeff3'}}}}
-      });
-    }
-
-    // Transfer modal controls
-    el('transferBtn').addEventListener('click', ()=> {
-      const fromSel = el('fromAcc'), toSel = el('toAcc');
-      fromSel.innerHTML=''; toSel.innerHTML='';
-      accountsCache.forEach(a=>{ fromSel.innerHTML += `<option value="${a.id}">${escapeHtml(a.name)}</option>`; toSel.innerHTML += `<option value="${a.id}">${escapeHtml(a.name)}</option>`; });
-      el('transferModal').style.display = 'grid';
-    });
-    el('cancelTransfer').addEventListener('click', ()=> { el('transferModal').style.display='none'; el('transferError').style.display='none'; });
-    el('confirmTransfer').addEventListener('click', async ()=>{
-      const fromId = el('fromAcc').value, toId = el('toAcc').value, amount = Number(el('amt').value);
-      const err = el('transferError'); err.style.display='none';
-      if(fromId === toId){ err.textContent='Choose different accounts.'; err.style.display='block'; return; }
-      if(!(amount>0)){ err.textContent='Enter a positive amount.'; err.style.display='block'; return; }
-      try{
-        const res = await fetch(API + '/api/transfer',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({fromId,toId,amount})});
-        if(!res.ok){ const body = await res.json().catch(()=>({error:'Transfer failed'})); throw new Error(body.error || 'Transfer failed'); }
-        await loadDashboard();
-        el('transferModal').style.display='none';
-        el('amt').value='';
-      }catch(e){ err.textContent = e.message; err.style.display='block'; }
-    });
-
-    el('logoutBtn').addEventListener('click', ()=> { token = null; location.reload(); });
-
-    el('exportBtn').addEventListener('click', ()=> {
-      // opens CSV export endpoint if backend supports ?format=csv
-      window.open(API + '/api/transactions?format=csv', '_blank');
-    });
-
-    // Helpers
-    function formatUSD(n){ return Number(n).toLocaleString('en-US',{style:'currency',currency:'USD'}) }
-    function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-    // Small keyboard support: Enter triggers login
-    el('pass').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') loginBtn.click(); });
-    el('user').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') loginBtn.click(); });
-
-    // Navigation focus for single-page feel
-    document.querySelectorAll('nav a').forEach(a=>{
-      a.addEventListener('click', (evt)=>{
-        const target = document.querySelector(a.getAttribute('href'));
-        if(target){ evt.preventDefault(); target.scrollIntoView({behavior:'smooth',block:'start'}); }
-      });
-    });
-  </script>
-</body>
-</html>
+// Transfer updates local state
+document.getElementById('confirmTransfer').addEventListener('click', ()=>{
+  const from=document.getElementById('fromAcc').value;
+  const to=document.getElementById('toAcc').value;
+  const amt=Number(document.getElementById('amt').value);
+  if(from===to || amt<=0 || demoState.balances[from]<amt){ document.getElementById('transferError').textContent="Invalid transfer"; document.getElementById('transferError').style.display='block'; return; }
+  demoState.balances[from]-=amt; demoState.balances[to]+=amt;
+  const today=new Date().toISOString().slice(0,10);
+  demoState.tx.push({date:today,account:from,type:"Transfer",desc:`Transfer to ${to}`,amt:-amt,bal:demoState.balances[from]});
+  demoState.tx.push({date:today,account:to,type:"Transfer",desc:`Transfer from ${from}`,amt:amt,bal:demoState.balances[to]});
+  renderBalances(); renderTx(); renderChart();
+  document.getElementById('transferModal').style.display='none';
+  document.getElementById('amt').value='';
+});
