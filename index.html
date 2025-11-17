@@ -3,166 +3,110 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Bank Interface — Secure Login</title>
+  <title>Secure Bank Interface</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#0b1220; --card:#0f1724; --muted:#9aa4b2; --accent:#0ea5a0; --accent-2:#06b6d4;
-      --surface:#0f2028; --danger:#ef4444; --glass: rgba(255,255,255,0.04);
-      --radius:12px; --shadow: 0 10px 30px rgba(2,6,23,0.6);
+      --radius:12px; --border:rgba(255,255,255,0.06);
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,-apple-system,Arial;color:#e6eef3;background:linear-gradient(180deg,#061023 0%, var(--bg) 60%);-webkit-font-smoothing:antialiased}
-    .wrap{max-width:1100px;margin:36px auto;padding:20px}
-    .layout{display:grid;grid-template-columns:420px 1fr;gap:28px;align-items:start}
-    @media (max-width:900px){.layout{grid-template-columns:1fr}.wrap{padding:12px}}
-    /* Login card */
-    .card{background:linear-gradient(180deg,var(--card), #071124);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.03)}
-    .brand{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-    .brand .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:700;color:#032024}
-    .brand h1{font-size:1.05rem;margin:0;font-weight:700;color:#e6f3f7}
-    .secure-note{margin-left:auto;color:var(--muted);font-size:0.85rem}
-    .login-title{font-size:1.25rem;margin:6px 0 14px 0;color:#f8fbfb}
-    .form-field{margin-bottom:12px}
-    label{display:block;font-size:0.85rem;color:var(--muted);margin-bottom:6px}
-    input[type="text"],input[type="password"]{
-      width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:#eaf6f8;font-size:0.95rem;
-      outline:none;transition:box-shadow .18s,transform .12s;
-    }
-    input:focus{box-shadow:0 6px 18px rgba(8,20,30,0.6);transform:translateY(-1px)}
+    *{box-sizing:border-box} html,body{height:100%;margin:0;background:#0b1220;color:#eaf2f7;font-family:Inter,-apple-system,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1080px;margin:36px auto;padding:0 18px}
+    .grid{display:grid;grid-template-columns:420px 1fr;gap:24px} @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg,#0f1724,#0a1422);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 10px 30px rgba(2,6,23,0.5);padding:22px}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#042a2a}
+    h1{margin:0;font-size:1.05rem} .secure-note{margin-left:auto;color:var(--muted);font-size:0.85rem}
+    .login-title{margin:8px 0 12px 0;font-size:1.25rem}
+    label{display:block;color:var(--muted);font-size:0.9rem;margin-bottom:6px}
+    input, select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#0a1422;color:#eaf2f7}
     .row{display:flex;gap:10px;align-items:center}
-    .btn{appearance:none;border:0;padding:11px 14px;border-radius:10px;font-weight:700;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#022028;box-shadow:0 8px 22px rgba(6,33,37,0.28)}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-    .muted{color:var(--muted);font-size:0.88rem}
-    .helper{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-    .show-pass{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px;font-size:0.92rem}
-    .error{color:var(--danger);font-size:0.85rem;margin-top:6px}
-    /* Dashboard card */
-    .panel{display:flex;flex-direction:column;gap:16px}
-    .profile-row{display:flex;justify-content:space-between;align-items:center}
-    .profile-left{display:flex;gap:14px;align-items:center}
-    .avatar{width:58px;height:58px;border-radius:10px;background:linear-gradient(135deg,#d1f6f2,#bbf0ee);display:grid;place-items:center;color:#034040;font-weight:700;font-size:1.1rem}
-    .cust-name{font-size:1.2rem;margin:0;color:#eaf6f8}
-    .cust-sub{color:var(--muted);font-size:0.9rem;margin-top:2px}
-    .sec-icons{display:flex;gap:10px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
-    @media (max-width:1100px){.grid{grid-template-columns:1fr}}
-    .overview{display:flex;flex-direction:column;gap:10px}
-    .balance-list{list-style:none;margin:0;padding:0}
-    .balance-list li{display:flex;justify-content:space-between;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(255,255,255,0.02)}
-    .label{color:var(--muted);font-size:0.9rem}
-    .value{font-weight:700;color:#eaf6f8}
-    .total-row{margin-top:8px;padding:12px;border-radius:10px;background:linear-gradient(90deg,rgba(14,165,160,0.08),rgba(6,182,212,0.06));display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(14,165,160,0.12)}
-    .actions{display:flex;gap:10px;margin-top:8px}
-    .action-small{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
-    /* chart & table */
-    .chart-card{padding:12px;border-radius:10px;background:linear-gradient(180deg,#071225, #071826);border:1px solid rgba(255,255,255,0.03)}
-    .table-wrap{max-height:260px;overflow:auto;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
-    table{width:100%;border-collapse:collapse;font-size:0.92rem}
-    th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.02);color:var(--muted)}
-    th{color:var(--muted);font-weight:700;text-align:left}
-    td.right{ text-align:right;color:#eaf6f8}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted);font-weight:600;font-size:0.85rem}
-    footer{margin-top:18px;color:var(--muted);font-size:0.9rem}
+    .btn{appearance:none;border:1px solid var(--border);background:#132136;color:#cfe7ea;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#062b2b;font-weight:800;border:none}
+    .btn-ghost{background:transparent}
+    .muted{color:var(--muted)} .error{color:#ef4444;font-size:0.88rem;margin-top:6px}
+    .layout-2{display:grid;grid-template-columns:1fr 360px;gap:16px} @media(max-width:1050px){.layout-2{grid-template-columns:1fr}}
+    .balances li{display:flex;justify-content:space-between;padding:10px;border-radius:10px;border:1px solid var(--border)}
+    .value{font-weight:700} .total{display:flex;justify-content:space-between;margin-top:8px;padding:12px;border-radius:10px;background:rgba(14,165,160,0.08);border:1px solid rgba(14,165,160,0.2)}
+    table{width:100%;border-collapse:collapse;font-size:0.92rem} th,td{padding:10px;border-bottom:1px solid var(--border)} th{color:var(--muted);text-align:left} td.right{text-align:right}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);font-weight:700;font-size:0.85rem}
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;place-items:center}
+    .modal-card{width:360px;background:#0a1422;border:1px solid var(--border);border-radius:12px;padding:16px}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="layout">
+    <div class="grid">
       <!-- LOGIN -->
-      <section class="card" aria-labelledby="login-heading">
+      <section class="card" id="loginCard" aria-labelledby="loginHeading">
         <div class="brand">
-          <div class="logo" aria-hidden="true">BI</div>
-          <h1 id="login-heading">Bank Interface</h1>
+          <div class="logo">BI</div>
+          <h1 id="loginHeading">Bank Interface</h1>
           <div class="secure-note">Advanced secured.</div>
         </div>
-
-        <div>
-          <h2 class="login-title">Secured Login</h2>
-          <form id="loginForm" autocomplete="on" novalidate>
-            <div class="form-field">
-              <label for="user">Username</label>
-              <input id="user" name="user" type="text" inputmode="text" placeholder="john.doe" required aria-required="true" />
-            </div>
-
-            <div class="form-field">
-              <label for="pass">Password</label>
-              <div class="row">
-                <input id="pass" name="pass" type="password" placeholder="Enter password" required aria-required="true" />
-                <button type="button" class="show-pass" id="togglePass" aria-label="Show password">Show</button>
-              </div>
-            </div>
-
-            <div class="helper">
-              <label class="muted"><input id="remember" type="checkbox" /> Remember me</label>
-              <a class="muted" href="#" id="forgot">Forgot password?</a>
-            </div>
-
-            <div style="margin-top:16px;display:flex;gap:10px">
-              <button class="btn btn-primary" type="submit">Login</button>
-              <button class="btn btn-ghost" type="button" id="biometric">Use biometric</button>
-            </div>
-
-            <div id="loginError" class="error" role="alert" style="display:none"></div>
-            <p class="muted" style="margin-top:12px">Demo: any non-empty username & password will sign in.</p>
-          </form>
-        </div>
-
-        <footer class="muted">Secure, encrypted session • Demo environment</footer>
+        <h2 class="login-title">Secured login</h2>
+        <form id="loginForm" novalidate>
+          <label for="user">Username</label>
+          <input id="user" name="user" type="text" placeholder="john.doe" required>
+          <label for="pass" style="margin-top:8px">Password</label>
+          <div class="row">
+            <input id="pass" name="pass" type="password" placeholder="Enter password" required>
+            <button type="button" class="btn btn-ghost" id="togglePass">Show</button>
+          </div>
+          <div class="row" style="justify-content:space-between;margin-top:8px">
+            <label class="muted"><input id="remember" type="checkbox"> Remember me</label>
+            <span class="muted">Demo vault is encrypted with your password</span>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn btn-primary" type="submit">Login</button>
+            <button class="btn btn-ghost" type="button" id="biometric">Use biometric</button>
+          </div>
+          <div id="loginError" class="error" style="display:none"></div>
+        </form>
       </section>
 
       <!-- DASHBOARD -->
-      <section class="panel" id="dashboard" style="display:none">
-        <div class="card">
-          <div class="profile-row">
-            <div class="profile-left">
-              <div class="avatar" aria-hidden="true">KL</div>
-              <div>
-                <p class="cust-name" id="custName">Kiara Lords</p>
-                <p class="cust-sub">Premium customer • Member since 2016</p>
-              </div>
-            </div>
-            <div class="sec-icons">
-              <span class="pill">MFA</span>
-              <span class="pill">Encrypted</span>
-              <span class="pill">PCI compliant</span>
-            </div>
+      <section class="card" id="dashboard" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div class="pill">User</div>
+            <strong id="custName">Customer</strong>
           </div>
-
-          <div class="grid" style="margin-top:12px">
-            <div class="overview card" style="padding:14px">
-              <h3 style="margin:0 0 8px 0">Account overview</h3>
-              <ul class="balance-list" id="balanceList">
-                <li><span class="label">Checking</span><span class="value" id="b-check">$162,515,673.60</span></li>
-                <li><span class="label">Premium Checking</span><span class="value" id="b-premium">$36,114,594.13</span></li>
-                <li><span class="label">Savings</span><span class="value" id="b-savings">$36,114,594.13</span></li>
-                <li><span class="label">Family Savings</span><span class="value" id="b-family">$36,114,594.13</span></li>
-              </ul>
-              <div class="total-row"><span class="muted">Total balance</span><span class="value" id="b-total">$270,859,456.00</span></div>
-
-              <div class="actions" style="margin-top:12px">
-                <button class="btn btn-primary" id="transferBtn">Transfer funds</button>
-                <button class="action-small" id="exportBtn">Export statement</button>
-                <button class="action-small" id="logoutBtn">Logout</button>
-              </div>
-            </div>
-
-            <div class="chart-card card">
-              <canvas id="balanceChart" width="320" height="220" aria-label="Account balances chart"></canvas>
-              <p class="muted" style="margin-top:10px;text-align:center">Distribution by account</p>
-            </div>
+          <div style="display:flex;gap:8px">
+            <span class="pill">MFA</span><span class="pill">Encrypted</span><span class="pill">PCI</span>
           </div>
         </div>
 
-        <div class="card">
-          <h3 style="margin:0 0 12px 0">Recent transactions</h3>
-          <div class="table-wrap">
-            <table aria-describedby="Recent transactions">
+        <div class="layout-2">
+          <div class="card" style="padding:14px">
+            <h3 style="margin:0 0 8px 0">Account overview</h3>
+            <ul class="balances" style="list-style:none;margin:0;padding:0" id="balanceList">
+              <li><span class="muted">Checking</span><span class="value" id="b-check">$0.00</span></li>
+              <li><span class="muted">Premium Checking</span><span class="value" id="b-premium">$0.00</span></li>
+              <li><span class="muted">Savings</span><span class="value" id="b-savings">$0.00</span></li>
+              <li><span class="muted">Family Savings</span><span class="value" id="b-family">$0.00</span></li>
+            </ul>
+            <div class="total"><span class="muted">Total balance</span><span class="value" id="b-total">$0.00</span></div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn btn-primary" id="transferBtn">Transfer funds</button>
+              <button class="btn" id="exportCsvBtn">Export CSV</button>
+              <button class="btn" id="exportEncBtn">Export encrypted</button>
+              <button class="btn" id="logoutBtn">Logout</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <canvas id="balanceChart" width="320" height="220" aria-label="Account balances chart"></canvas>
+            <p class="muted" style="margin-top:10px;text-align:center">Distribution by account</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin:0 0 10px 0">Recent transactions</h3>
+          <div style="max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:10px">
+            <table>
               <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead>
-              <tbody id="txBody">
-                <!-- JS fills rows -->
-              </tbody>
+              <tbody id="txBody"></tbody>
             </table>
           </div>
         </div>
@@ -170,174 +114,229 @@
     </div>
   </div>
 
-  <!-- lightweight modal for transfer (simple) -->
-  <div id="transferModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);place-items:center;display:grid">
-    <div style="width:360px;background:#081623;border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03)">
+  <!-- Transfer modal -->
+  <div class="modal" id="transferModal">
+    <div class="modal-card">
       <h3 style="margin:0 0 10px 0">Transfer funds</h3>
-      <div style="display:grid;gap:10px">
-        <select id="fromAcc" style="padding:10px;border-radius:8px;background:#071226;color:#eaf6f8;border:none">
-          <option value="Checking">Checking</option>
-          <option value="Premium Checking">Premium Checking</option>
-          <option value="Savings">Savings</option>
-          <option value="Family Savings">Family Savings</option>
-        </select>
-        <select id="toAcc" style="padding:10px;border-radius:8px;background:#071226;color:#eaf6f8;border:none">
-          <option value="Premium Checking">Premium Checking</option>
-          <option value="Checking">Checking</option>
-          <option value="Savings">Savings</option>
-          <option value="Family Savings">Family Savings</option>
-        </select>
-        <input id="amt" type="number" min="0" step="0.01" placeholder="Amount (USD)" style="padding:10px;border-radius:8px;background:#071226;color:#eaf6f8;border:none"/>
-        <div style="display:flex;gap:8px">
-          <button id="confirmTransfer" class="btn btn-primary" style="flex:1">Confirm</button>
-          <button id="cancelTransfer" class="btn btn-ghost" style="flex:1">Cancel</button>
-        </div>
-        <div id="transferError" class="error" style="display:none"></div>
+      <label for="fromAcc">From account</label>
+      <select id="fromAcc">
+        <option>Checking</option><option>Premium Checking</option><option>Savings</option><option>Family Savings</option>
+      </select>
+      <label for="toAcc" style="margin-top:8px">To account</label>
+      <select id="toAcc">
+        <option>Premium Checking</option><option>Checking</option><option>Savings</option><option>Family Savings</option>
+      </select>
+      <label for="amt" style="margin-top:8px">Amount (USD)</label>
+      <input id="amt" type="number" min="0" step="0.01" placeholder="0.00">
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-primary" id="confirmTransfer">Confirm</button>
+        <button class="btn btn-ghost" id="cancelTransfer">Cancel</button>
       </div>
+      <div id="transferError" class="error" style="display:none"></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
-    // Demo state (numeric values)
-    const state = {
+    // ---------- Crypto helpers (AES-GCM + PBKDF2 via Web Crypto) ----------
+    const VAULT_KEY = 'bank.vault'; // localStorage key
+    const ENCODER = new TextEncoder(), DECODER = new TextDecoder();
+
+    async function deriveKey(password, saltBytes){
+      const baseKey = await crypto.subtle.importKey('raw', ENCODER.encode(password), 'PBKDF2', false, ['deriveKey']);
+      return crypto.subtle.deriveKey(
+        { name:'PBKDF2', salt:saltBytes, iterations:100000, hash:'SHA-256' },
+        baseKey,
+        { name:'AES-GCM', length:256 },
+        false,
+        ['encrypt','decrypt']
+      );
+    }
+    async function encryptVault(password, obj){
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveKey(password, salt);
+      const plaintext = ENCODER.encode(JSON.stringify(obj));
+      const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, plaintext));
+      const payload = { salt: btoa(String.fromCharCode(...salt)), iv: btoa(String.fromCharCode(...iv)), data: btoa(String.fromCharCode(...ciphertext)) };
+      localStorage.setItem(VAULT_KEY, JSON.stringify(payload));
+      return payload;
+    }
+    async function decryptVault(password){
+      const raw = localStorage.getItem(VAULT_KEY);
+      if(!raw) return null;
+      const payload = JSON.parse(raw);
+      const salt = Uint8Array.from(atob(payload.salt), c=>c.charCodeAt(0));
+      const iv = Uint8Array.from(atob(payload.iv), c=>c.charCodeAt(0));
+      const data = Uint8Array.from(atob(payload.data), c=>c.charCodeAt(0));
+      const key = await deriveKey(password, salt);
+      try{
+        const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, data);
+        return JSON.parse(DECODER.decode(new Uint8Array(plain)));
+      }catch(e){
+        return null; // wrong password or tampered data
+      }
+    }
+
+    // ---------- Demo initial data ----------
+    const INITIAL_STATE = {
       balances: {
-        "Checking": 162515673.60,
-        "Premium Checking": 36114594.13,
-        "Savings": 36114594.13,
-        "Family Savings": 36114594.13
+        "Checking": 162_515_673.60,
+        "Premium Checking": 36_114_594.13,
+        "Savings": 36_114_594.13,
+        "Family Savings": 36_114_594.13
       },
       tx: [
-        {date:"2025-10-01",account:"Checking",type:"Deposit",desc:"Wire transfer",amt:50000000,bal:162515673.60},
-        {date:"2025-10-15",account:"Premium Checking",type:"Withdrawal",desc:"Property investment",amt:-5000000,bal:31114594.13},
-        {date:"2025-09-20",account:"Family Savings",type:"Withdrawal",desc:"Family expenses",amt:-2000000,bal:34114594.13}
-      ]
+        {date:"2025-10-01",account:"Checking",type:"Deposit",desc:"Wire transfer",amt:50_000_000,bal:162_515_673.60},
+        {date:"2025-10-15",account:"Premium Checking",type:"Withdrawal",desc:"Property investment",amt:-5_000_000,bal:31_114_594.13},
+        {date:"2025-09-20",account:"Family Savings",type:"Withdrawal",desc:"Family expenses",amt:-2_000_000,bal:34_114_594.13}
+      ],
+      user: null
     };
 
-    // ---- Login logic ----
+    // ---------- UI / state ----------
+    let runtime = null; // decrypted state in memory
     const loginForm = document.getElementById('loginForm');
     const loginError = document.getElementById('loginError');
+    const loginCard = document.getElementById('loginCard');
     const dashboard = document.getElementById('dashboard');
-    loginForm.addEventListener('submit', e => {
+
+    document.getElementById('togglePass').addEventListener('click', (e)=>{
+      const p = document.getElementById('pass');
+      if(p.type === 'password'){ p.type='text'; e.target.textContent='Hide'; } else { p.type='password'; e.target.textContent='Show'; }
+    });
+
+    document.getElementById('biometric').addEventListener('click', async ()=>{
+      const user = document.getElementById('user').value.trim() || 'biometric.user';
+      const pass = 'biometric-pass'; // demo-only shortcut
+      await ensureVault(pass, user);
+      await unlock(pass, user);
+    });
+
+    loginForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       loginError.style.display = 'none';
       const user = document.getElementById('user').value.trim();
       const pass = document.getElementById('pass').value.trim();
-      if(!user || !pass){ loginError.textContent = 'Please provide username and password.'; loginError.style.display='block'; return; }
-      // Demo auth: accept any non-empty credentials
-      sessionStorage.setItem('demoUser', user);
+      if(!user || !pass){ loginError.textContent = 'Enter username and password.'; loginError.style.display = 'block'; return; }
+      await ensureVault(pass, user);
+      const ok = await unlock(pass, user);
+      if(!ok){ loginError.textContent = 'Invalid password or data corrupted.'; loginError.style.display = 'block'; }
+    });
+
+    async function ensureVault(password, user){
+      // If no vault exists, create one encrypted with this password
+      if(!localStorage.getItem(VAULT_KEY)){
+        const init = structuredClone(INITIAL_STATE);
+        init.user = user;
+        await encryptVault(password, init);
+      }
+    }
+
+    async function unlock(password, user){
+      const data = await decryptVault(password);
+      if(!data) return false;
+      runtime = data;
+      runtime.user = user; // set current session user display
       showDashboard();
-    });
+      return true;
+    }
 
-    document.getElementById('biometric').addEventListener('click', () => {
-      // Demo biometric shortcut
-      sessionStorage.setItem('demoUser','biometric.user');
-      showDashboard();
-    });
-
-    document.getElementById('togglePass').addEventListener('click', (e) => {
-      const p = document.getElementById('pass');
-      if(p.type === 'password'){ p.type='text'; e.target.textContent='Hide'; }
-      else { p.type='password'; e.target.textContent='Show'; }
-    });
-
-    // ---- Render dashboard ----
-    let chart;
     function showDashboard(){
-      document.querySelector('.card[aria-labelledby="login-heading"]').style.display='none';
-      dashboard.style.display='block';
+      loginCard.style.display = 'none';
+      dashboard.style.display = 'block';
+      document.getElementById('custName').textContent = runtime.user || 'Customer';
       renderBalances();
       renderChart();
       renderTx();
     }
 
+    function formatUSD(n){ return Number(n).toLocaleString('en-US',{style:'currency',currency:'USD'}); }
+
     function renderBalances(){
-      document.getElementById('b-check').textContent = formatUSD(state.balances["Checking"]);
-      document.getElementById('b-premium').textContent = formatUSD(state.balances["Premium Checking"]);
-      document.getElementById('b-savings').textContent = formatUSD(state.balances["Savings"]);
-      document.getElementById('b-family').textContent = formatUSD(state.balances["Family Savings"]);
-      const total = Object.values(state.balances).reduce((s,v)=>s+v,0);
+      document.getElementById('b-check').textContent   = formatUSD(runtime.balances["Checking"]);
+      document.getElementById('b-premium').textContent = formatUSD(runtime.balances["Premium Checking"]);
+      document.getElementById('b-savings').textContent = formatUSD(runtime.balances["Savings"]);
+      document.getElementById('b-family').textContent  = formatUSD(runtime.balances["Family Savings"]);
+      const total = Object.values(runtime.balances).reduce((s,v)=>s+v,0);
       document.getElementById('b-total').textContent = formatUSD(total);
-      document.getElementById('custName').textContent = sessionStorage.getItem('demoUser') || 'Kiara Lords';
     }
 
+    let chart;
     function renderChart(){
       const ctx = document.getElementById('balanceChart');
       if(chart) chart.destroy();
       chart = new Chart(ctx, {
         type:'doughnut',
         data:{
-          labels: Object.keys(state.balances),
-          datasets:[{
-            data: Object.values(state.balances),
-            backgroundColor:['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa'],
-            hoverOffset:8,
-            borderWidth:2,
-            borderColor:'#071226'
-          }]
+          labels:Object.keys(runtime.balances),
+          datasets:[{ data:Object.values(runtime.balances), backgroundColor:['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa'], borderColor:'#0a1422', borderWidth:2 }]
         },
-        options:{
-          maintainAspectRatio:false,
-          plugins:{legend:{position:'bottom',labels:{color:'#cfeff3'}}}
-        }
+        options:{ plugins:{ legend:{ position:'bottom', labels:{ color:'#cfeff3' } } } }
       });
     }
 
     function renderTx(){
       const tbody = document.getElementById('txBody');
       tbody.innerHTML = '';
-      state.tx.slice().reverse().forEach(t=>{
+      runtime.tx.slice().reverse().forEach(t=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${t.date}</td>
-                        <td>${t.account}</td>
-                        <td>${t.type}</td>
-                        <td>${escapeHtml(t.desc)}</td>
-                        <td class="right">${formatUSD(t.amt)}</td>
-                        <td class="right">${formatUSD(t.bal)}</td>`;
+        tr.innerHTML = `<td>${t.date}</td><td>${t.account}</td><td>${t.type}</td><td>${escapeHtml(t.desc)}</td><td class="right">${formatUSD(t.amt)}</td><td class="right">${formatUSD(t.bal)}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    // ---- Transfers ----
-    document.getElementById('transferBtn').addEventListener('click', ()=>{ document.getElementById('transferModal').style.display='grid'; document.getElementById('transferError').style.display='none'; });
-    document.getElementById('cancelTransfer').addEventListener('click', ()=>{ document.getElementById('transferModal').style.display='none'; });
-    document.getElementById('confirmTransfer').addEventListener('click', ()=> {
+    // Transfer flow
+    const transferModal = document.getElementById('transferModal');
+    document.getElementById('transferBtn').addEventListener('click', ()=>{ transferModal.style.display='grid'; document.getElementById('transferError').style.display='none'; });
+    document.getElementById('cancelTransfer').addEventListener('click', ()=>{ transferModal.style.display='none'; });
+    document.getElementById('confirmTransfer').addEventListener('click', async ()=>{
       const from = document.getElementById('fromAcc').value;
-      const to = document.getElementById('toAcc').value;
-      const amt = parseFloat(document.getElementById('amt').value);
-      const errEl = document.getElementById('transferError');
-      errEl.style.display='none';
-      if(from === to){ errEl.textContent='Choose different source and destination.'; errEl.style.display='block'; return; }
-      if(!(amt>0)){ errEl.textContent='Enter a positive amount.'; errEl.style.display='block'; return; }
-      if(state.balances[from] < amt){ errEl.textContent='Insufficient funds in source account.'; errEl.style.display='block'; return; }
-      // Update balances and transactions (demo only, local state)
-      state.balances[from] -= amt;
-      state.balances[to] += amt;
-      const now = new Date().toISOString().slice(0,10);
-      state.tx.push({date:now,account:from,type:'Transfer',desc:`Transfer to ${to}`,amt:-amt,bal:state.balances[from]});
-      state.tx.push({date:now,account:to,type:'Transfer',desc:`Transfer from ${from}`,amt:amt,bal:state.balances[to]});
-      renderBalances(); renderChart(); renderTx();
-      document.getElementById('transferModal').style.display='none';
-      document.getElementById('amt').value='';
+      const to   = document.getElementById('toAcc').value;
+      const amt  = parseFloat(document.getElementById('amt').value);
+      const err  = document.getElementById('transferError');
+      err.style.display='none';
+      if(from === to){ err.textContent='Choose different accounts.'; err.style.display='block'; return; }
+      if(!(amt>0)){ err.textContent='Enter a positive amount.'; err.style.display='block'; return; }
+      if(runtime.balances[from] < amt){ err.textContent='Insufficient funds.'; err.style.display='block'; return; }
+      runtime.balances[from] -= amt;
+      runtime.balances[to] += amt;
+      const today = new Date().toISOString().slice(0,10);
+      runtime.tx.push({date:today,account:from,type:'Transfer',desc:`Transfer to ${to}`,amt:-amt,bal:runtime.balances[from]});
+      runtime.tx.push({date:today,account:to,type:'Transfer',desc:`Transfer from ${from}`,amt:amt,bal:runtime.balances[to]});
+      persist(); renderBalances(); renderChart(); renderTx();
+      transferModal.style.display='none'; document.getElementById('amt').value='';
     });
 
-    // ---- Export & logout ----
-    document.getElementById('exportBtn').addEventListener('click', ()=> {
-      const rows = [['Date','Account','Type','Description','Amount','Balance']];
-      state.tx.forEach(r=>rows.push([r.date,r.account,r.type,r.desc,r.amt,r.bal]));
+    // Export
+    document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+      const rows = [['Date','Account','Type','Description','Amount','Balance'], ...runtime.tx.map(r=>[r.date,r.account,r.type,r.desc,r.amt,r.bal])];
       const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-      const blob = new Blob([csv],{type:'text/csv'}); const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='statement.csv'; a.click(); URL.revokeObjectURL(url);
+      downloadBlob(new Blob([csv],{type:'text/csv'}),'statement.csv');
+    });
+    document.getElementById('exportEncBtn').addEventListener('click', async ()=>{
+      const pass = document.getElementById('pass').value.trim() || 'biometric-pass';
+      const payload = await encryptVault(pass, runtime);
+      downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'encrypted-vault.json');
+      // Re-save vault (already done by encryptVault) to keep ciphertext current
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', ()=> {
-      sessionStorage.removeItem('demoUser');
-      location.reload();
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      runtime = null;
+      document.getElementById('pass').value = '';
+      dashboard.style.display = 'none';
+      loginCard.style.display = 'block';
     });
 
-    // small helpers
-    function formatUSD(n){ return (typeof n === 'number' ? n : Number(n)).toLocaleString('en-US',{style:'currency',currency:'USD'}); }
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function persist(){
+      const pass = document.getElementById('pass').value.trim() || 'biometric-pass';
+      encryptVault(pass, runtime); // re-encrypt and store
+    }
+    function downloadBlob(blob, name){
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url);
+    }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   </script>
 </body>
 </html>
