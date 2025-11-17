@@ -3,132 +3,339 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Your Name — Portfolio & Secure Bank Demo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Secure Banking — Sign in</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0f172a;--card:#0b1220;--muted:#9aa4b2;--text:#e2e8f0;--accent:#22c55e;--accent-2:#06b6d4;--border:rgba(255,255,255,0.06)}
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-    header{max-width:1100px;margin:0 auto;padding:28px 20px;display:flex;align-items:center;justify-content:space-between}
-    nav{display:flex;gap:18px}nav a{color:var(--text);opacity:.9;font-weight:600;text-decoration:none}
-    nav a:hover{opacity:1}
-    .wrap{max-width:1100px;margin:0 auto;padding:20px}
-    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;padding:48px 0}
-    .hero h1{font-size:44px;margin:0 0 12px}.hero p{font-size:18px;opacity:.95;margin:0 0 18px}
-    .btn{display:inline-block;background:var(--accent);color:#052e17;padding:12px 16px;border-radius:10px;font-weight:700}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .section{padding:40px 0}
-    footer{border-top:1px solid #122238;padding:24px 0;margin-top:40px}
-    @media(max-width:900px){.hero{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
-    /* Banking UI */
-    .bank-card{background:#0f1724;border-radius:12px;padding:22px;border:1px solid var(--border)}
-    input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#071226;color:var(--text);margin-bottom:10px}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#062b2b;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);padding:9px 12px;border-radius:10px;cursor:pointer}
-    table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;border-bottom:1px solid var(--border);font-size:0.92rem}
-    th{color:var(--muted);text-align:left}td.right{text-align:right;color:var(--text)}
+    :root{
+      --bg:#0b1220; --card:#0f1724; --text:#eaf2f7; --muted:#9aa4b2;
+      --accent:#0ea5a0; --accent-2:#06b6d4; --border:rgba(255,255,255,0.06);
+      --danger:#ef4444; --ok:#22c55e;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#061023,var(--bg) 60%);color:var(--text);font-family:Inter,-apple-system,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    header .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#073b3b}
+    .card{background:linear-gradient(180deg,var(--card),#091423);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 10px 24px rgba(2,6,23,.5)}
+    .grid{display:grid;grid-template-columns:420px 1fr;gap:24px}
+    @media(max-width:960px){.grid{grid-template-columns:1fr}}
+    h1,h2,h3{margin:0 0 10px 0}
+    label{display:block;font-size:.9rem;color:var(--muted);margin-bottom:6px}
+    input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#091423;color:var(--text);margin-bottom:10px}
+    .row{display:flex;gap:10px;align-items:center}
+    .btn{appearance:none;border:1px solid var(--border);background:#132136;color:#cfe7ea;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#062b2b;border:none;font-weight:700}
+    .btn-ghost{background:transparent;color:var(--muted)}
+    .muted{color:var(--muted)}
+    .error{color:var(--danger);font-size:.9rem;margin-top:6px}
+    .ok{color:var(--ok);font-size:.9rem;margin-top:6px}
     .hidden{display:none}
+    .balances{list-style:none;padding:0;margin:0}
+    .balances li{display:flex;justify-content:space-between;padding:10px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--border);font-size:.92rem}
+    th{color:var(--muted);text-align:left}
+    td.right{text-align:right}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-weight:700;font-size:.85rem}
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,.6);display:none;place-items:center}
+    .modal-card{width:360px;background:#091423;border:1px solid var(--border);border-radius:12px;padding:16px}
+    .loading{opacity:.6;pointer-events:none}
   </style>
 </head>
 <body>
-  <header>
-    <div><strong>Your Name</strong></div>
-    <nav>
-      <a href="#work">Work</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-      <a href="#bank">Bank Demo</a>
-    </nav>
-  </header>
-
-  <main class="wrap">
-    <!-- Portfolio -->
-    <section class="hero">
-      <div>
-        <h1>Building simple things that feel good to use.</h1>
-        <p>I design and develop fast, accessible websites for small businesses and creatives in Nigeria.</p>
-        <a class="btn" href="#contact">Start a project</a>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">BI</div>
+        <strong>Secure Banking</strong>
       </div>
-      <div class="card">
-        <strong>Currently:</strong>
-        <p>Available for 2 new projects this month. Typical turnaround: 2–3 weeks.</p>
-      </div>
-    </section>
+      <div class="pill">Encrypted • JWT</div>
+    </header>
 
-    <section id="work" class="section">
-      <h2>Selected work</h2>
-      <div class="grid-3">
-        <div class="card"><strong>Marketplace landing</strong><p>Conversion-focused homepage with animations.</p></div>
-        <div class="card"><strong>Restaurant site</strong><p>Menu + online ordering integration.</p></div>
-        <div class="card"><strong>Portfolio</strong><p>Minimal aesthetic, fast load times.</p></div>
-      </div>
-    </section>
+    <div class="grid">
+      <!-- Auth card -->
+      <section class="card" id="authCard" aria-labelledby="authHeading">
+        <h2 id="authHeading">Sign in</h2>
+        <form id="authForm" novalidate>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" placeholder="john.doe" required>
+          <label for="password">Password</label>
+          <div class="row">
+            <input id="password" name="password" type="password" placeholder="Enter password" required>
+            <button type="button" class="btn btn-ghost" id="togglePass">Show</button>
+          </div>
+          <div class="row" style="justify-content:space-between">
+            <button type="button" class="btn" id="registerBtn">Register</button>
+            <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
+          </div>
+          <div id="authMsg" class="error hidden"></div>
+          <div id="authOk" class="ok hidden"></div>
+          <p class="muted" style="margin-top:8px">Use strong credentials. After login, your balances and transactions load securely.</p>
+        </form>
+      </section>
 
-    <section id="about" class="section">
-      <h2>About</h2>
-      <p>I’m a web designer/developer based in Oyo State. I care about clarity, speed, and trustworthy design.</p>
-    </section>
+      <!-- Dashboard -->
+      <section class="card hidden" id="dashboard">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#d1f6f2,#bbf0ee);display:grid;place-items:center;color:#034040;font-weight:700">U</div>
+            <div>
+              <h3 id="custName">Customer</h3>
+              <p class="muted">Member • Secure session</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <span class="pill">MFA</span><span class="pill">AES‑GCM</span><span class="pill">JWT</span>
+          </div>
+        </div>
 
-    <section id="contact" class="section card">
-      <h2>Contact</h2>
-      <p>Email: you@example.com</p>
-      <p>WhatsApp: +234-000-000-0000</p>
-    </section>
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;margin-top:12px">
+          <div class="card" style="padding:14px">
+            <h4 style="margin:0 0 8px 0">Account overview</h4>
+            <ul class="balances" id="balanceList"></ul>
+            <div style="margin-top:10px;padding:12px;border-radius:10px;background:rgba(14,165,160,.08);border:1px solid rgba(14,165,160,.2);display:flex;justify-content:space-between">
+              <span class="muted">Total balance</span><strong id="totalBalance">$0.00</strong>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn btn-primary" id="transferBtn">Transfer funds</button>
+              <button class="btn" id="exportBtn">Export CSV</button>
+              <button class="btn" id="logoutBtn">Logout</button>
+            </div>
+          </div>
 
-    <!-- Banking Demo -->
-    <section id="bank" class="section">
-      <h2>Secure Bank Demo</h2>
-      <div class="bank-card" id="loginCard">
-        <h3>Login</h3>
-        <input id="user" placeholder="Username"/>
-        <input id="pass" type="password" placeholder="Password"/>
-        <button class="btn-primary" id="loginBtn">Login</button>
-        <div id="loginError" style="color:#ef4444;display:none"></div>
-      </div>
+          <div class="card">
+            <canvas id="balanceChart" width="320" height="220" aria-label="Account balances chart"></canvas>
+            <p class="muted" style="margin-top:10px;text-align:center">Distribution by account</p>
+          </div>
+        </div>
 
-      <div class="bank-card hidden" id="dashboard">
-        <h3 id="custName">Customer</h3>
-        <div id="balances"></div>
-        <button class="btn-primary" id="transferBtn">Transfer Funds</button>
-        <button class="btn-ghost" id="exportBtn">Export CSV</button>
-        <button class="btn-ghost" id="logoutBtn">Logout</button>
-        <h4>Transactions</h4>
-        <table><thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead><tbody id="txBody"></tbody></table>
-      </div>
-    </section>
-  </main>
-
-  <footer class="wrap"><p>© <span id="year"></span> Your Name. All rights reserved.</p></footer>
-
-  <!-- Transfer Modal -->
-  <div class="bank-card hidden" id="transferModal" style="position:fixed;top:20%;left:50%;transform:translateX(-50%);max-width:360px">
-    <h3>Transfer Funds</h3>
-    <select id="fromAcc"></select>
-    <select id="toAcc"></select>
-    <input id="amt" type="number" placeholder="Amount"/>
-    <button class="btn-primary" id="confirmTransfer">Confirm</button>
-    <button class="btn-ghost" id="cancelTransfer">Cancel</button>
-    <div id="transferError" style="color:#ef4444;display:none"></div>
+        <div class="card" style="margin-top:14px">
+          <h4 style="margin:0 0 10px 0">Recent transactions</h4>
+          <div style="max-height:280px;overflow:auto;border-radius:10px">
+            <table>
+              <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead>
+              <tbody id="txBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-document.getElementById('year').textContent=new Date().getFullYear();
+  <!-- Transfer modal -->
+  <div class="modal" id="transferModal">
+    <div class="modal-card">
+      <h3 style="margin:0 0 10px 0">Transfer funds</h3>
+      <label>From account</label>
+      <select id="fromAcc"></select>
+      <label>To account</label>
+      <select id="toAcc"></select>
+      <label>Amount (USD)</label>
+      <input id="amt" type="number" min="0" step="0.01" placeholder="0.00">
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-primary" id="confirmTransfer">Confirm</button>
+        <button class="btn btn-ghost" id="cancelTransfer">Cancel</button>
+      </div>
+      <div id="transferError" class="error hidden"></div>
+    </div>
+  </div>
 
-// Demo state
-let demoState={
-  balances:{"Checking":162515673.60,"Premium Checking":36114594.13,"Savings":36114594.13,"Family Savings":36114594.13},
-  tx:[
-    {date:"2025-10-01",account:"Checking",type:"Deposit",desc:"Wire transfer",amt:50000000,bal:162515673.60},
-    {date:"2025-10-15",account:"Premium Checking",type:"Withdrawal",desc:"Property investment",amt:-5000000,bal:31114594.13},
-    {date:"2025-09-20",account:"Family Savings",type:"Withdrawal",desc:"Family expenses",amt:-2000000,bal:34114594.13}
-  ],
-  user:null
-};
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    // ----- Config -----
+    const API_BASE = "https://your-backend.onrender.com"; // TODO: replace with your backend URL
+    let token = null;
+    let accounts = []; // cached accounts for selects/chart
 
-document.getElementById('loginBtn').addEventListener('click',()=>{
-  const usr=document.getElementById('user').value.trim()||"Demo User";
-  demoState.user=usr;
-  document.getElementById('custName').textContent=usr;
-  document.getElementById('loginCard').
+    // ----- Utilities -----
+    const $ = (id) => document.getElementById(id);
+    const show = (el) => el.classList.remove('hidden');
+    const hide = (el) => el.classList.add('hidden');
+    const setLoading = (el, on) => el.classList.toggle('loading', !!on);
+    function formatUSD(n){ return Number(n).toLocaleString('en-US',{style:'currency',currency:'USD'}) }
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+
+    // ----- Auth UI -----
+    $('togglePass').addEventListener('click', (e) => {
+      const p = $('password');
+      p.type = p.type === 'password' ? 'text' : 'password';
+      e.target.textContent = p.type === 'password' ? 'Show' : 'Hide';
+    });
+
+    $('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await login();
+    });
+    $('registerBtn').addEventListener('click', register);
+
+    async function register(){
+      const username = $('username').value.trim();
+      const password = $('password').value.trim();
+      if(!username || !password) return showMsg('authMsg','Enter username and password.');
+      setLoading($('authCard'), true);
+      try{
+        const res = await fetch(API_BASE + '/api/register', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json().catch(()=> ({}));
+        if(!res.ok){ throw new Error(data.error || 'Registration failed'); }
+        showMsg('authOk','Registration successful. You can now sign in.');
+      }catch(err){
+        showMsg('authMsg', err.message || 'Registration failed');
+      }finally{
+        setLoading($('authCard'), false);
+      }
+    }
+
+    async function login(){
+      const username = $('username').value.trim();
+      const password = $('password').value.trim();
+      if(!username || !password) return showMsg('authMsg','Enter username and password.');
+      setLoading($('authCard'), true);
+      try{
+        const res = await fetch(API_BASE + '/api/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json().catch(()=> ({}));
+        if(!res.ok){ throw new Error(data.error || 'Login failed'); }
+        token = data.token;
+        hide($('authMsg')); hide($('authOk'));
+        $('custName').textContent = username;
+        hide($('authCard')); show($('dashboard'));
+        await loadDashboard();
+      }catch(err){
+        showMsg('authMsg', err.message || 'Login failed');
+      }finally{
+        setLoading($('authCard'), false);
+      }
+    }
+
+    function showMsg(id, msg){
+      const el = $(id);
+      el.textContent = msg;
+      show(el);
+      if(id !== 'authMsg') hide($('authMsg'));
+      if(id !== 'authOk') hide($('authOk'));
+    }
+
+    // ----- Data loading -----
+    async function loadDashboard(){
+      await Promise.all([loadBalances(), loadTransactions()]);
+      renderChart();
+      wireActions();
+    }
+
+    async function loadBalances(){
+      const res = await fetch(API_BASE + '/api/balances', { headers: authHeaders() });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok){ return showMsg('authMsg', data.error || 'Failed to load balances'); }
+      accounts = data.accounts || [];
+      const list = $('balanceList'); list.innerHTML = '';
+      let total = 0;
+      accounts.forEach(a=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="muted">${escapeHtml(a.name)}</span><strong>${formatUSD(a.balance)}</strong>`;
+        list.appendChild(li);
+        total += Number(a.balance);
+      });
+      $('totalBalance').textContent = formatUSD(total);
+    }
+
+    async function loadTransactions(){
+      const res = await fetch(API_BASE + '/api/transactions', { headers: authHeaders() });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok){ return showMsg('authMsg', data.error || 'Failed to load transactions'); }
+      const tbody = $('txBody'); tbody.innerHTML = '';
+      (data.transactions || []).forEach(t=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(t.date).toISOString().slice(0,10)}</td>
+          <td>${escapeHtml(t.accountName || t.accountId)}</td>
+          <td>${escapeHtml(t.type)}</td>
+          <td>${escapeHtml(t.description)}</td>
+          <td class="right">${formatUSD(t.amount)}</td>
+          <td class="right">${formatUSD(t.balanceAfter)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function authHeaders(){
+      return token ? { Authorization: 'Bearer ' + token } : {};
+    }
+
+    // ----- Transfers -----
+    function wireActions(){
+      $('transferBtn').onclick = openTransfer;
+      $('cancelTransfer').onclick = () => { $('transferModal').style.display='none'; hide($('transferError')); };
+      $('confirmTransfer').onclick = confirmTransfer;
+      $('exportBtn').onclick = exportCsv;
+      $('logoutBtn').onclick = () => { token=null; location.reload(); };
+    }
+
+    function openTransfer(){
+      const from = $('fromAcc'), to = $('toAcc');
+      from.innerHTML = ''; to.innerHTML = '';
+      accounts.forEach(a=>{
+        from.innerHTML += `<option value="${a.id}">${escapeHtml(a.name)}</option>`;
+        to.innerHTML   += `<option value="${a.id}">${escapeHtml(a.name)}</option>`;
+      });
+      $('transferModal').style.display = 'grid';
+    }
+
+    async function confirmTransfer(){
+      const fromId = Number($('fromAcc').value);
+      const toId   = Number($('toAcc').value);
+      const amount = Number($('amt').value);
+      if(!fromId || !toId || !(amount>0) || fromId === toId){
+        $('transferError').textContent = 'Invalid transfer request';
+        show($('transferError')); return;
+      }
+      const res = await fetch(API_BASE + '/api/transfer', {
+        method:'POST', headers:{'Content-Type':'application/json', ...authHeaders()},
+        body: JSON.stringify({ fromId, toId, amount })
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok){
+        $('transferError').textContent = data.error || 'Transfer failed';
+        show($('transferError')); return;
+      }
+      $('transferModal').style.display = 'none';
+      $('amt').value = '';
+      hide($('transferError'));
+      await loadDashboard();
+    }
+
+    // ----- Export -----
+    async function exportCsv(){
+      // If backend supports CSV query, open it; otherwise build CSV client-side from data
+      try{
+        const res = await fetch(API_BASE + '/api/transactions', { headers: authHeaders() });
+        const data = await res.json();
+        const rows = [['Date','Account','Type','Description','Amount','Balance']].concat(
+          (data.transactions||[]).map(t => [
+            new Date(t.date).toISOString().slice(0,10),
+            t.accountName || t.accountId,
+            t.type, t.description, t.amount, t.balanceAfter
+          ])
+        );
+        const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type:'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'statement.csv'; a.click();
+        URL.revokeObjectURL(url);
+      }catch(e){
+        showMsg('authMsg','Export failed');
+      }
+    }
+
+    // Init
+    (function init(){
+      // focus usability
+      $('username').focus();
+    })();
+  </script>
+</body>
+</html>
