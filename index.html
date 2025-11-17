@@ -28,7 +28,10 @@
         <h2>Sign in</h2>
         <label>Username</label><input id="username" type="text" placeholder="john.doe">
         <label>Password</label>
-        <div class="row"><input id="password" type="password" placeholder="Enter password"><button class="btn" id="togglePass" type="button">Show</button></div>
+        <div class="row">
+          <input id="password" type="password" placeholder="Enter password">
+          <button class="btn" id="togglePass" type="button">Show</button>
+        </div>
         <div class="row" style="justify-content:space-between">
           <button class="btn" id="registerBtn">Register</button>
           <button class="btn btn-primary" id="loginBtn">Login</button>
@@ -95,16 +98,187 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
-    // IMPORTANT: replace with your Render backend URL
+    // IMPORTANT: set this to your Render backend URL (e.g., https://bank-api.onrender.com)
     const API_BASE = "https://your-render-url";
 
     let token = null, accounts = [], chart = null;
-    const $ = id => document.getElementById(id); const show = el => el.classList.remove('hidden'); const hide = el => el.classList.add('hidden');
+    const $ = id => document.getElementById(id);
+    const show = el => el.classList.remove('hidden');
+    const hide = el => el.classList.add('hidden');
     const formatUSD = n => Number(n).toLocaleString('en-US',{style:'currency',currency:'USD'});
     const escapeHtml = s => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-    $('togglePass').onclick = () => { const p = $('password'); const s = p.type==='password'?'text':'password'; p.type=s; $('togglePass').textContent = s==='password'?'Show':'Hide'; };
-    $('registerBtn').onclick = async ()=>{
-      const u=$('username').value.trim(), p=$('password').value.trim();
-      if(!u||!p) return showErr('Enter username and password.');
-      const res = await fetch(API_BASE+'/api/register',{method:'POST',headers:{'Content-Type
+    // Auth UI
+    $('togglePass').onclick = () => {
+      const p = $('password');
+      const isPass = p.type === 'password';
+      p.type = isPass ? 'text' : 'password';
+      $('togglePass').textContent = isPass ? 'Hide' : 'Show';
+    };
+
+    $('registerBtn').onclick = async () => {
+      const u = $('username').value.trim(), p = $('password').value.trim();
+      if (!u || !p) return showErr('Enter username and password.');
+      const res = await fetch(API_BASE + '/api/register', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({username: u, password: p})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return showErr(data.error || 'Registration failed');
+      showOk('Registration successful. Sign in now.');
+    };
+
+    $('loginBtn').onclick = async () => {
+      const u = $('username').value.trim(), p = $('password').value.trim();
+      if (!u || !p) return showErr('Enter username and password.');
+      const res = await fetch(API_BASE + '/api/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({username: u, password: p})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return showErr(data.error || 'Login failed');
+      token = data.token;
+      $('custName').textContent = u;
+      hide($('authCard'));
+      show($('dashboard'));
+      loadDashboard();
+    };
+
+    $('logoutBtn').onclick = () => { token = null; location.reload(); };
+
+    function showErr(msg) {
+      const el = $('authMsg');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      el.classList.add('error');
+      el.style.color = '#ef4444';
+    }
+    function showOk(msg) {
+      const el = $('authMsg');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      el.classList.remove('error');
+      el.style.color = '#22c55e';
+    }
+
+    // Dashboard
+    async function loadDashboard() {
+      await Promise.all([loadBalances(), loadTransactions()]);
+      renderChart();
+      wireTransfer();
+    }
+
+    async function loadBalances() {
+      const res = await fetch(API_BASE + '/api/balances', { headers: authHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return showErr(data.error || 'Failed to load balances');
+      accounts = data.accounts || [];
+      const list = $('balanceList'); list.innerHTML = '';
+      let total = 0;
+      accounts.forEach(a => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="muted">${escapeHtml(a.name)}</span><strong>${formatUSD(a.balance)}</strong>`;
+        list.appendChild(li);
+        total += Number(a.balance);
+      });
+      $('totalBalance').textContent = formatUSD(total);
+    }
+
+    async function loadTransactions() {
+      const res = await fetch(API_BASE + '/api/transactions', { headers: authHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return showErr(data.error || 'Failed to load transactions');
+      const tbody = $('txBody'); tbody.innerHTML = '';
+      (data.transactions || []).forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(t.date).toISOString().slice(0,10)}</td>
+          <td>${escapeHtml(String(t.accountId))}</td>
+          <td>${escapeHtml(t.type)}</td>
+          <td>${escapeHtml(t.description)}</td>
+          <td class="right">${formatUSD(t.amount)}</td>
+          <td class="right">${formatUSD(t.balanceAfter)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('balanceChart');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: accounts.map(a => a.name),
+          datasets: [{ data: accounts.map(a => a.balance), backgroundColor: ['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa'] }]
+        },
+        options: { plugins: { legend: { labels: { color: '#cfeff3' } } } }
+      });
+    }
+
+    function wireTransfer() {
+      $('transferBtn').onclick = () => {
+        const from = $('fromAcc'), to = $('toAcc');
+        from.innerHTML = ''; to.innerHTML = '';
+        accounts.forEach(a => {
+          from.innerHTML += `<option value="${a.id}">${escapeHtml(a.name)}</option>`;
+          to.innerHTML   += `<option value="${a.id}">${escapeHtml(a.name)}</option>`;
+        });
+        document.getElementById('transferModal').style.display = 'grid';
+      };
+      $('cancelTransfer').onclick = () => {
+        document.getElementById('transferModal').style.display = 'none';
+        hide($('transferError'));
+      };
+      $('confirmTransfer').onclick = confirmTransfer;
+      $('exportBtn').onclick = exportCsv;
+    }
+
+    async function confirmTransfer() {
+      const fromId = Number($('fromAcc').value), toId = Number($('toAcc').value), amount = Number($('amt').value);
+      if (!fromId || !toId || !(amount > 0) || fromId === toId) {
+        $('transferError').textContent = 'Invalid transfer request';
+        show($('transferError')); return;
+      }
+      const res = await fetch(API_BASE + '/api/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', ...authHeaders() },
+        body: JSON.stringify({ fromId, toId, amount })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        $('transferError').textContent = data.error || 'Transfer failed';
+        show($('transferError')); return;
+      }
+      document.getElementById('transferModal').style.display = 'none';
+      $('amt').value = '';
+      hide($('transferError'));
+      await loadDashboard();
+    }
+
+    async function exportCsv() {
+      const res = await fetch(API_BASE + '/api/transactions', { headers: authHeaders() });
+      const data = await res.json();
+      const rows = [['Date','Account','Type','Description','Amount','Balance']].concat(
+        (data.transactions || []).map(t => [
+          new Date(t.date).toISOString().slice(0,10),
+          t.accountId,
+          t.type,
+          t.description,
+          t.amount,
+          t.balanceAfter
+        ])
+      );
+      const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type:'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'statement.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function authHeaders() { return token ? { Authorization: 'Bearer ' + token } : {}; }
+  </script>
+</body>
+</html>
