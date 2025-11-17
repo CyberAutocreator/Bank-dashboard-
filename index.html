@@ -1,75 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Your Name — Portfolio & Secure Bank Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--muted:#9aa4b2;--text:#e2e8f0;--accent:#22c55e;--accent-2:#06b6d4;--border:rgba(255,255,255,0.06)}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+    header{max-width:1100px;margin:0 auto;padding:28px 20px;display:flex;align-items:center;justify-content:space-between}
+    nav{display:flex;gap:18px}nav a{color:var(--text);opacity:.9;font-weight:600;text-decoration:none}
+    nav a:hover{opacity:1}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;padding:48px 0}
+    .hero h1{font-size:44px;margin:0 0 12px}.hero p{font-size:18px;opacity:.95;margin:0 0 18px}
+    .btn{display:inline-block;background:var(--accent);color:#052e17;padding:12px 16px;border-radius:10px;font-weight:700}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .section{padding:40px 0}
+    footer{border-top:1px solid #122238;padding:24px 0;margin-top:40px}
+    @media(max-width:900px){.hero{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
+    /* Banking UI */
+    .bank-card{background:#0f1724;border-radius:12px;padding:22px;border:1px solid var(--border)}
+    input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#071226;color:var(--text);margin-bottom:10px}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#062b2b;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);padding:9px 12px;border-radius:10px;cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;border-bottom:1px solid var(--border);font-size:0.92rem}
+    th{color:var(--muted);text-align:left}td.right{text-align:right;color:var(--text)}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>Your Name</strong></div>
+    <nav>
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="#bank">Bank Demo</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <!-- Portfolio -->
+    <section class="hero">
+      <div>
+        <h1>Building simple things that feel good to use.</h1>
+        <p>I design and develop fast, accessible websites for small businesses and creatives in Nigeria.</p>
+        <a class="btn" href="#contact">Start a project</a>
+      </div>
+      <div class="card">
+        <strong>Currently:</strong>
+        <p>Available for 2 new projects this month. Typical turnaround: 2–3 weeks.</p>
+      </div>
+    </section>
+
+    <section id="work" class="section">
+      <h2>Selected work</h2>
+      <div class="grid-3">
+        <div class="card"><strong>Marketplace landing</strong><p>Conversion-focused homepage with animations.</p></div>
+        <div class="card"><strong>Restaurant site</strong><p>Menu + online ordering integration.</p></div>
+        <div class="card"><strong>Portfolio</strong><p>Minimal aesthetic, fast load times.</p></div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <h2>About</h2>
+      <p>I’m a web designer/developer based in Oyo State. I care about clarity, speed, and trustworthy design.</p>
+    </section>
+
+    <section id="contact" class="section card">
+      <h2>Contact</h2>
+      <p>Email: you@example.com</p>
+      <p>WhatsApp: +234-000-000-0000</p>
+    </section>
+
+    <!-- Banking Demo -->
+    <section id="bank" class="section">
+      <h2>Secure Bank Demo</h2>
+      <div class="bank-card" id="loginCard">
+        <h3>Login</h3>
+        <input id="user" placeholder="Username"/>
+        <input id="pass" type="password" placeholder="Password"/>
+        <button class="btn-primary" id="loginBtn">Login</button>
+        <div id="loginError" style="color:#ef4444;display:none"></div>
+      </div>
+
+      <div class="bank-card hidden" id="dashboard">
+        <h3 id="custName">Customer</h3>
+        <div id="balances"></div>
+        <button class="btn-primary" id="transferBtn">Transfer Funds</button>
+        <button class="btn-ghost" id="exportBtn">Export CSV</button>
+        <button class="btn-ghost" id="logoutBtn">Logout</button>
+        <h4>Transactions</h4>
+        <table><thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead><tbody id="txBody"></tbody></table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap"><p>© <span id="year"></span> Your Name. All rights reserved.</p></footer>
+
+  <!-- Transfer Modal -->
+  <div class="bank-card hidden" id="transferModal" style="position:fixed;top:20%;left:50%;transform:translateX(-50%);max-width:360px">
+    <h3>Transfer Funds</h3>
+    <select id="fromAcc"></select>
+    <select id="toAcc"></select>
+    <input id="amt" type="number" placeholder="Amount"/>
+    <button class="btn-primary" id="confirmTransfer">Confirm</button>
+    <button class="btn-ghost" id="cancelTransfer">Cancel</button>
+    <div id="transferError" style="color:#ef4444;display:none"></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.getElementById('year').textContent=new Date().getFullYear();
+
 // Demo state
-let demoState = {
-  balances: {
-    "Checking": 162515673.60,
-    "Premium Checking": 36114594.13,
-    "Savings": 36114594.13,
-    "Family Savings": 36114594.13
-  },
-  tx: [
+let demoState={
+  balances:{"Checking":162515673.60,"Premium Checking":36114594.13,"Savings":36114594.13,"Family Savings":36114594.13},
+  tx:[
     {date:"2025-10-01",account:"Checking",type:"Deposit",desc:"Wire transfer",amt:50000000,bal:162515673.60},
     {date:"2025-10-15",account:"Premium Checking",type:"Withdrawal",desc:"Property investment",amt:-5000000,bal:31114594.13},
     {date:"2025-09-20",account:"Family Savings",type:"Withdrawal",desc:"Family expenses",amt:-2000000,bal:34114594.13}
   ],
-  user: null
+  user:null
 };
 
-// Login/Register just unlock dashboard
-document.getElementById('loginBtn').addEventListener('click', ()=>{
-  const usr = document.getElementById('user').value.trim() || "Demo User";
-  demoState.user = usr;
-  document.getElementById('custName').textContent = usr;
-  document.getElementById('loginCard').style.display='none';
-  document.getElementById('dashboard').style.display='';
-  renderBalances(); renderTx(); renderChart();
-});
-document.getElementById('registerBtn').addEventListener('click', ()=>{
-  document.getElementById('loginBtn').click(); // same as login
-});
-document.getElementById('biometric').addEventListener('click', ()=>{
-  demoState.user = "biometric.user";
-  document.getElementById('custName').textContent = demoState.user;
-  document.getElementById('loginCard').style.display='none';
-  document.getElementById('dashboard').style.display='';
-  renderBalances(); renderTx(); renderChart();
-});
-
-// Render functions
-function renderBalances(){
-  const mapping = {"Checking":"b-check","Premium Checking":"b-premium","Savings":"b-savings","Family Savings":"b-family"};
-  let total=0;
-  for(const [name,val] of Object.entries(demoState.balances)){
-    document.getElementById(mapping[name]).textContent = formatUSD(val);
-    total+=val;
-  }
-  document.getElementById('b-total').textContent = formatUSD(total);
-}
-function renderTx(){
-  const tbody=document.getElementById('txBody'); tbody.innerHTML="";
-  demoState.tx.slice().reverse().forEach(t=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${t.date}</td><td>${t.account}</td><td>${t.type}</td><td>${t.desc}</td><td class="right">${formatUSD(t.amt)}</td><td class="right">${formatUSD(t.bal)}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-function renderChart(){
-  const ctx=document.getElementById('balanceChart');
-  if(window.chart) window.chart.destroy();
-  window.chart=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(demoState.balances),datasets:[{data:Object.values(demoState.balances),backgroundColor:['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa']}]},options:{plugins:{legend:{labels:{color:'#cfeff3'}}}}});
-}
-function formatUSD(n){ return Number(n).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
-
-// Transfer updates local state
-document.getElementById('confirmTransfer').addEventListener('click', ()=>{
-  const from=document.getElementById('fromAcc').value;
-  const to=document.getElementById('toAcc').value;
-  const amt=Number(document.getElementById('amt').value);
-  if(from===to || amt<=0 || demoState.balances[from]<amt){ document.getElementById('transferError').textContent="Invalid transfer"; document.getElementById('transferError').style.display='block'; return; }
-  demoState.balances[from]-=amt; demoState.balances[to]+=amt;
-  const today=new Date().toISOString().slice(0,10);
-  demoState.tx.push({date:today,account:from,type:"Transfer",desc:`Transfer to ${to}`,amt:-amt,bal:demoState.balances[from]});
-  demoState.tx.push({date:today,account:to,type:"Transfer",desc:`Transfer from ${from}`,amt:amt,bal:demoState.balances[to]});
-  renderBalances(); renderTx(); renderChart();
-  document.getElementById('transferModal').style.display='none';
-  document.getElementById('amt').value='';
-});
+document.getElementById('loginBtn').addEventListener('click',()=>{
+  const usr=document.getElementById('user').value.trim()||"Demo User";
+  demoState.user=usr;
+  document.getElementById('custName').textContent=usr;
+  document.getElementById('loginCard').
