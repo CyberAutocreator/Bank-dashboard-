@@ -1,341 +1,164 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Secure Banking — Sign in</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0b1220; --card:#0f1724; --text:#eaf2f7; --muted:#9aa4b2;
-      --accent:#0ea5a0; --accent-2:#06b6d4; --border:rgba(255,255,255,0.06);
-      --danger:#ef4444; --ok:#22c55e;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#061023,var(--bg) 60%);color:var(--text);font-family:Inter,-apple-system,Segoe UI,Roboto,Arial}
-    .wrap{max-width:1100px;margin:0 auto;padding:24px}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-    header .brand{display:flex;align-items:center;gap:10px}
-    .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#073b3b}
-    .card{background:linear-gradient(180deg,var(--card),#091423);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 10px 24px rgba(2,6,23,.5)}
-    .grid{display:grid;grid-template-columns:420px 1fr;gap:24px}
-    @media(max-width:960px){.grid{grid-template-columns:1fr}}
-    h1,h2,h3{margin:0 0 10px 0}
-    label{display:block;font-size:.9rem;color:var(--muted);margin-bottom:6px}
-    input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#091423;color:var(--text);margin-bottom:10px}
-    .row{display:flex;gap:10px;align-items:center}
-    .btn{appearance:none;border:1px solid var(--border);background:#132136;color:#cfe7ea;padding:10px 12px;border-radius:10px;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#062b2b;border:none;font-weight:700}
-    .btn-ghost{background:transparent;color:var(--muted)}
-    .muted{color:var(--muted)}
-    .error{color:var(--danger);font-size:.9rem;margin-top:6px}
-    .ok{color:var(--ok);font-size:.9rem;margin-top:6px}
-    .hidden{display:none}
-    .balances{list-style:none;padding:0;margin:0}
-    .balances li{display:flex;justify-content:space-between;padding:10px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid var(--border);font-size:.92rem}
-    th{color:var(--muted);text-align:left}
-    td.right{text-align:right}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-weight:700;font-size:.85rem}
-    .modal{position:fixed;inset:0;background:rgba(2,6,23,.6);display:none;place-items:center}
-    .modal-card{width:360px;background:#091423;border:1px solid var(--border);border-radius:12px;padding:16px}
-    .loading{opacity:.6;pointer-events:none}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">BI</div>
-        <strong>Secure Banking</strong>
-      </div>
-      <div class="pill">Encrypted • JWT</div>
-    </header>
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 
-    <div class="grid">
-      <!-- Auth card -->
-      <section class="card" id="authCard" aria-labelledby="authHeading">
-        <h2 id="authHeading">Sign in</h2>
-        <form id="authForm" novalidate>
-          <label for="username">Username</label>
-          <input id="username" name="username" type="text" placeholder="john.doe" required>
-          <label for="password">Password</label>
-          <div class="row">
-            <input id="password" name="password" type="password" placeholder="Enter password" required>
-            <button type="button" class="btn btn-ghost" id="togglePass">Show</button>
-          </div>
-          <div class="row" style="justify-content:space-between">
-            <button type="button" class="btn" id="registerBtn">Register</button>
-            <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
-          </div>
-          <div id="authMsg" class="error hidden"></div>
-          <div id="authOk" class="ok hidden"></div>
-          <p class="muted" style="margin-top:8px">Use strong credentials. After login, your balances and transactions load securely.</p>
-        </form>
-      </section>
+const prisma = new PrismaClient();
+const app = express();
 
-      <!-- Dashboard -->
-      <section class="card hidden" id="dashboard">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="display:flex;gap:12px;align-items:center">
-            <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#d1f6f2,#bbf0ee);display:grid;place-items:center;color:#034040;font-weight:700">U</div>
-            <div>
-              <h3 id="custName">Customer</h3>
-              <p class="muted">Member • Secure session</p>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <span class="pill">MFA</span><span class="pill">AES‑GCM</span><span class="pill">JWT</span>
-          </div>
-        </div>
+app.use(express.json());
+app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: false }));
 
-        <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;margin-top:12px">
-          <div class="card" style="padding:14px">
-            <h4 style="margin:0 0 8px 0">Account overview</h4>
-            <ul class="balances" id="balanceList"></ul>
-            <div style="margin-top:10px;padding:12px;border-radius:10px;background:rgba(14,165,160,.08);border:1px solid rgba(14,165,160,.2);display:flex;justify-content:space-between">
-              <span class="muted">Total balance</span><strong id="totalBalance">$0.00</strong>
-            </div>
-            <div class="row" style="margin-top:12px">
-              <button class="btn btn-primary" id="transferBtn">Transfer funds</button>
-              <button class="btn" id="exportBtn">Export CSV</button>
-              <button class="btn" id="logoutBtn">Logout</button>
-            </div>
-          </div>
+// AES-256-GCM helpers
+function deriveKey(keyMaterialBase64) {
+  const raw = Buffer.from(keyMaterialBase64, 'base64');
+  return crypto.createHash('sha256').update(raw).digest(); // 32 bytes
+}
+function encryptNumber(num, keyBuf) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', keyBuf, iv);
+  const enc = Buffer.concat([cipher.update(String(num)), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return { iv: iv.toString('base64'), data: enc.toString('base64'), tag: tag.toString('base64') };
+}
+function decryptNumber(encObj, keyBuf) {
+  const iv = Buffer.from(encObj.iv, 'base64');
+  const data = Buffer.from(encObj.data, 'base64');
+  const tag = Buffer.from(encObj.tag, 'base64');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', keyBuf, iv);
+  decipher.setAuthTag(tag);
+  const dec = Buffer.concat([decipher.update(data), decipher.final()]);
+  return Number(dec.toString());
+}
+function signToken(user) {
+  return jwt.sign({ sub: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '12h' });
+}
+function auth(req, res, next) {
+  const hdr = req.headers.authorization || '';
+  const token = hdr.startsWith('Bearer ') ? hdr.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Missing token' });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}
 
-          <div class="card">
-            <canvas id="balanceChart" width="320" height="220" aria-label="Account balances chart"></canvas>
-            <p class="muted" style="margin-top:10px;text-align:center">Distribution by account</p>
-          </div>
-        </div>
+// Health
+app.get('/api/health', (_, res) => res.json({ ok: true }));
 
-        <div class="card" style="margin-top:14px">
-          <h4 style="margin:0 0 10px 0">Recent transactions</h4>
-          <div style="max-height:280px;overflow:auto;border-radius:10px">
-            <table>
-              <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead>
-              <tbody id="txBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
+// Register
+app.post('/api/register', async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).json({ error: 'username and password required' });
+  const exists = await prisma.user.findUnique({ where: { username } });
+  if (exists) return res.status(409).json({ error: 'username taken' });
 
-  <!-- Transfer modal -->
-  <div class="modal" id="transferModal">
-    <div class="modal-card">
-      <h3 style="margin:0 0 10px 0">Transfer funds</h3>
-      <label>From account</label>
-      <select id="fromAcc"></select>
-      <label>To account</label>
-      <select id="toAcc"></select>
-      <label>Amount (USD)</label>
-      <input id="amt" type="number" min="0" step="0.01" placeholder="0.00">
-      <div class="row" style="margin-top:12px">
-        <button class="btn btn-primary" id="confirmTransfer">Confirm</button>
-        <button class="btn btn-ghost" id="cancelTransfer">Cancel</button>
-      </div>
-      <div id="transferError" class="error hidden"></div>
-    </div>
-  </div>
+  const passwordHash = await bcrypt.hash(password, 12);
+  const keyMaterial = crypto.randomBytes(32).toString('base64');
+  const user = await prisma.user.create({ data: { username, passwordHash, keyMaterial } });
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
-    // ----- Config -----
-    const API_BASE = "https://your-backend.onrender.com"; // TODO: replace with your backend URL
-    let token = null;
-    let accounts = []; // cached accounts for selects/chart
+  const keyBuf = deriveKey(keyMaterial);
+  const initial = {
+    Checking: 162_515_673.60,
+    'Premium Checking': 36_114_594.13,
+    Savings: 36_114_594.13,
+    'Family Savings': 36_114_594.13
+  };
+  for (const [name, val] of Object.entries(initial)) {
+    await prisma.account.create({ data: { userId: user.id, name, encBalance: encryptNumber(val, keyBuf) } });
+  }
+  res.json({ ok: true });
+});
 
-    // ----- Utilities -----
-    const $ = (id) => document.getElementById(id);
-    const show = (el) => el.classList.remove('hidden');
-    const hide = (el) => el.classList.add('hidden');
-    const setLoading = (el, on) => el.classList.toggle('loading', !!on);
-    function formatUSD(n){ return Number(n).toLocaleString('en-US',{style:'currency',currency:'USD'}) }
-    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+// Login
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body || {};
+  const user = await prisma.user.findUnique({ where: { username } });
+  if (!user) return res.status(401).json({ error: 'invalid credentials' });
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) return res.status(401).json({ error: 'invalid credentials' });
+  res.json({ token: signToken(user) });
+});
 
-    // ----- Auth UI -----
-    $('togglePass').addEventListener('click', (e) => {
-      const p = $('password');
-      p.type = p.type === 'password' ? 'text' : 'password';
-      e.target.textContent = p.type === 'password' ? 'Show' : 'Hide';
-    });
+// Balances
+app.get('/api/balances', auth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.sub } });
+  const keyBuf = deriveKey(user.keyMaterial);
+  const accounts = await prisma.account.findMany({ where: { userId: user.id } });
+  res.json({
+    accounts: accounts.map(a => ({
+      id: a.id, name: a.name, balance: decryptNumber(a.encBalance, keyBuf)
+    }))
+  });
+});
 
-    $('authForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await login();
-    });
-    $('registerBtn').addEventListener('click', register);
+// Transactions
+app.get('/api/transactions', auth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.sub } });
+  const keyBuf = deriveKey(user.keyMaterial);
+  const txs = await prisma.transaction.findMany({ where: { userId: user.id }, orderBy: { date: 'desc' } });
+  res.json({
+    transactions: txs.map(t => ({
+      id: t.id,
+      date: t.date,
+      accountId: t.accountId,
+      type: t.type,
+      description: t.description,
+      amount: decryptNumber(t.encAmount, keyBuf),
+      balanceAfter: decryptNumber(t.encBalanceAfter, keyBuf)
+    }))
+  });
+});
 
-    async function register(){
-      const username = $('username').value.trim();
-      const password = $('password').value.trim();
-      if(!username || !password) return showMsg('authMsg','Enter username and password.');
-      setLoading($('authCard'), true);
-      try{
-        const res = await fetch(API_BASE + '/api/register', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json().catch(()=> ({}));
-        if(!res.ok){ throw new Error(data.error || 'Registration failed'); }
-        showMsg('authOk','Registration successful. You can now sign in.');
-      }catch(err){
-        showMsg('authMsg', err.message || 'Registration failed');
-      }finally{
-        setLoading($('authCard'), false);
+// Transfer
+app.post('/api/transfer', auth, async (req, res) => {
+  const { fromId, toId, amount } = req.body || {};
+  const amt = Number(amount);
+  if (!fromId || !toId || !(amt > 0) || fromId === toId)
+    return res.status(400).json({ error: 'invalid transfer request' });
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.sub } });
+  const keyBuf = deriveKey(user.keyMaterial);
+
+  const fromAcc = await prisma.account.findFirst({ where: { id: fromId, userId: user.id } });
+  const toAcc = await prisma.account.findFirst({ where: { id: toId, userId: user.id } });
+  if (!fromAcc || !toAcc) return res.status(404).json({ error: 'account not found' });
+
+  const fromBal = decryptNumber(fromAcc.encBalance, keyBuf);
+  const toBal = decryptNumber(toAcc.encBalance, keyBuf);
+  if (fromBal < amt) return res.status(400).json({ error: 'insufficient funds' });
+
+  const newFrom = fromBal - amt;
+  const newTo = toBal + amt;
+
+  await prisma.$transaction([
+    prisma.account.update({ where: { id: fromAcc.id }, data: { encBalance: encryptNumber(newFrom, keyBuf) } }),
+    prisma.account.update({ where: { id: toAcc.id }, data: { encBalance: encryptNumber(newTo, keyBuf) } }),
+    prisma.transaction.create({
+      data: {
+        userId: user.id, accountId: fromAcc.id, type: 'Transfer',
+        description: `Transfer to ${toAcc.name}`,
+        encAmount: encryptNumber(-amt, keyBuf),
+        encBalanceAfter: encryptNumber(newFrom, keyBuf)
       }
-    }
-
-    async function login(){
-      const username = $('username').value.trim();
-      const password = $('password').value.trim();
-      if(!username || !password) return showMsg('authMsg','Enter username and password.');
-      setLoading($('authCard'), true);
-      try{
-        const res = await fetch(API_BASE + '/api/login', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json().catch(()=> ({}));
-        if(!res.ok){ throw new Error(data.error || 'Login failed'); }
-        token = data.token;
-        hide($('authMsg')); hide($('authOk'));
-        $('custName').textContent = username;
-        hide($('authCard')); show($('dashboard'));
-        await loadDashboard();
-      }catch(err){
-        showMsg('authMsg', err.message || 'Login failed');
-      }finally{
-        setLoading($('authCard'), false);
+    }),
+    prisma.transaction.create({
+      data: {
+        userId: user.id, accountId: toAcc.id, type: 'Transfer',
+        description: `Transfer from ${fromAcc.name}`,
+        encAmount: encryptNumber(amt, keyBuf),
+        encBalanceAfter: encryptNumber(newTo, keyBuf)
       }
-    }
+    })
+  ]);
 
-    function showMsg(id, msg){
-      const el = $(id);
-      el.textContent = msg;
-      show(el);
-      if(id !== 'authMsg') hide($('authMsg'));
-      if(id !== 'authOk') hide($('authOk'));
-    }
+  res.json({ ok: true });
+});
 
-    // ----- Data loading -----
-    async function loadDashboard(){
-      await Promise.all([loadBalances(), loadTransactions()]);
-      renderChart();
-      wireActions();
-    }
-
-    async function loadBalances(){
-      const res = await fetch(API_BASE + '/api/balances', { headers: authHeaders() });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok){ return showMsg('authMsg', data.error || 'Failed to load balances'); }
-      accounts = data.accounts || [];
-      const list = $('balanceList'); list.innerHTML = '';
-      let total = 0;
-      accounts.forEach(a=>{
-        const li = document.createElement('li');
-        li.innerHTML = `<span class="muted">${escapeHtml(a.name)}</span><strong>${formatUSD(a.balance)}</strong>`;
-        list.appendChild(li);
-        total += Number(a.balance);
-      });
-      $('totalBalance').textContent = formatUSD(total);
-    }
-
-    async function loadTransactions(){
-      const res = await fetch(API_BASE + '/api/transactions', { headers: authHeaders() });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok){ return showMsg('authMsg', data.error || 'Failed to load transactions'); }
-      const tbody = $('txBody'); tbody.innerHTML = '';
-      (data.transactions || []).forEach(t=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${new Date(t.date).toISOString().slice(0,10)}</td>
-          <td>${escapeHtml(t.accountName || t.accountId)}</td>
-          <td>${escapeHtml(t.type)}</td>
-          <td>${escapeHtml(t.description)}</td>
-          <td class="right">${formatUSD(t.amount)}</td>
-          <td class="right">${formatUSD(t.balanceAfter)}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function authHeaders(){
-      return token ? { Authorization: 'Bearer ' + token } : {};
-    }
-
-    // ----- Transfers -----
-    function wireActions(){
-      $('transferBtn').onclick = openTransfer;
-      $('cancelTransfer').onclick = () => { $('transferModal').style.display='none'; hide($('transferError')); };
-      $('confirmTransfer').onclick = confirmTransfer;
-      $('exportBtn').onclick = exportCsv;
-      $('logoutBtn').onclick = () => { token=null; location.reload(); };
-    }
-
-    function openTransfer(){
-      const from = $('fromAcc'), to = $('toAcc');
-      from.innerHTML = ''; to.innerHTML = '';
-      accounts.forEach(a=>{
-        from.innerHTML += `<option value="${a.id}">${escapeHtml(a.name)}</option>`;
-        to.innerHTML   += `<option value="${a.id}">${escapeHtml(a.name)}</option>`;
-      });
-      $('transferModal').style.display = 'grid';
-    }
-
-    async function confirmTransfer(){
-      const fromId = Number($('fromAcc').value);
-      const toId   = Number($('toAcc').value);
-      const amount = Number($('amt').value);
-      if(!fromId || !toId || !(amount>0) || fromId === toId){
-        $('transferError').textContent = 'Invalid transfer request';
-        show($('transferError')); return;
-      }
-      const res = await fetch(API_BASE + '/api/transfer', {
-        method:'POST', headers:{'Content-Type':'application/json', ...authHeaders()},
-        body: JSON.stringify({ fromId, toId, amount })
-      });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok){
-        $('transferError').textContent = data.error || 'Transfer failed';
-        show($('transferError')); return;
-      }
-      $('transferModal').style.display = 'none';
-      $('amt').value = '';
-      hide($('transferError'));
-      await loadDashboard();
-    }
-
-    // ----- Export -----
-    async function exportCsv(){
-      // If backend supports CSV query, open it; otherwise build CSV client-side from data
-      try{
-        const res = await fetch(API_BASE + '/api/transactions', { headers: authHeaders() });
-        const data = await res.json();
-        const rows = [['Date','Account','Type','Description','Amount','Balance']].concat(
-          (data.transactions||[]).map(t => [
-            new Date(t.date).toISOString().slice(0,10),
-            t.accountName || t.accountId,
-            t.type, t.description, t.amount, t.balanceAfter
-          ])
-        );
-        const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-        const blob = new Blob([csv], { type:'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'statement.csv'; a.click();
-        URL.revokeObjectURL(url);
-      }catch(e){
-        showMsg('authMsg','Export failed');
-      }
-    }
-
-    // Init
-    (function init(){
-      // focus usability
-      $('username').focus();
-    })();
-  </script>
-</body>
-</html>
+const port = process.env.PORT || 8080;
+app.listen(port, () => console.log(`API listening on ${port}`));
