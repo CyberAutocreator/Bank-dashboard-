@@ -1,145 +1,343 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Secured Bank Dashboard</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Bank Interface — Secure Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { margin:0; font-family:Arial,sans-serif; background:#0f172a; color:white; }
-    header { display:flex; justify-content:space-between; padding:1rem; background:#1e293b; }
-    .login-panel { text-align:center; padding:2rem; }
-    .login-panel input { display:block; margin:0.5rem auto; padding:0.5rem; background:#334155; border:none; color:white; }
-    .login-panel button { padding:0.5rem 1rem; background:#22c55e; border:none; color:white; cursor:pointer; }
-    .dashboard { padding:1rem; }
-    .account-overview ul { list-style:none; padding:0; }
-    .account-overview li { margin:0.5rem 0; }
-    .actions button { margin:0.5rem; padding:0.5rem 1rem; background:#334155; border:none; color:white; cursor:pointer; }
-    .hidden { display:none; }
-    table { width:100%; border-collapse:collapse; margin-top:1rem; }
-    th,td { padding:0.5rem; border-bottom:1px solid #334155; }
-    th { text-align:left; color:#9ca3af; }
-    td.right { text-align:right; }
-    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; }
-    .modal-content { background:#1e293b; padding:1rem; border-radius:8px; width:300px; }
-    .modal-content label { display:block; margin:0.5rem 0; }
-    .modal-content input,.modal-content select { width:100%; padding:0.5rem; background:#334155; border:none; color:white; }
-    .modal-content button { margin-top:0.5rem; padding:0.5rem; width:100%; }
+    :root{
+      --bg:#0b1220; --card:#0f1724; --muted:#9aa4b2; --accent:#0ea5a0; --accent-2:#06b6d4;
+      --surface:#0f2028; --danger:#ef4444; --glass: rgba(255,255,255,0.04);
+      --radius:12px; --shadow: 0 10px 30px rgba(2,6,23,0.6);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,-apple-system,Arial;color:#e6eef3;background:linear-gradient(180deg,#061023 0%, var(--bg) 60%);-webkit-font-smoothing:antialiased}
+    .wrap{max-width:1100px;margin:36px auto;padding:20px}
+    .layout{display:grid;grid-template-columns:420px 1fr;gap:28px;align-items:start}
+    @media (max-width:900px){.layout{grid-template-columns:1fr}.wrap{padding:12px}}
+    /* Login card */
+    .card{background:linear-gradient(180deg,var(--card), #071124);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.03)}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .brand .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:700;color:#032024}
+    .brand h1{font-size:1.05rem;margin:0;font-weight:700;color:#e6f3f7}
+    .secure-note{margin-left:auto;color:var(--muted);font-size:0.85rem}
+    .login-title{font-size:1.25rem;margin:6px 0 14px 0;color:#f8fbfb}
+    .form-field{margin-bottom:12px}
+    label{display:block;font-size:0.85rem;color:var(--muted);margin-bottom:6px}
+    input[type="text"],input[type="password"]{
+      width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:#eaf6f8;font-size:0.95rem;
+      outline:none;transition:box-shadow .18s,transform .12s;
+    }
+    input:focus{box-shadow:0 6px 18px rgba(8,20,30,0.6);transform:translateY(-1px)}
+    .row{display:flex;gap:10px;align-items:center}
+    .btn{appearance:none;border:0;padding:11px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#022028;box-shadow:0 8px 22px rgba(6,33,37,0.28)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .muted{color:var(--muted);font-size:0.88rem}
+    .helper{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+    .show-pass{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px;font-size:0.92rem}
+    .error{color:var(--danger);font-size:0.85rem;margin-top:6px}
+    /* Dashboard card */
+    .panel{display:flex;flex-direction:column;gap:16px}
+    .profile-row{display:flex;justify-content:space-between;align-items:center}
+    .profile-left{display:flex;gap:14px;align-items:center}
+    .avatar{width:58px;height:58px;border-radius:10px;background:linear-gradient(135deg,#d1f6f2,#bbf0ee);display:grid;place-items:center;color:#034040;font-weight:700;font-size:1.1rem}
+    .cust-name{font-size:1.2rem;margin:0;color:#eaf6f8}
+    .cust-sub{color:var(--muted);font-size:0.9rem;margin-top:2px}
+    .sec-icons{display:flex;gap:10px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    @media (max-width:1100px){.grid{grid-template-columns:1fr}}
+    .overview{display:flex;flex-direction:column;gap:10px}
+    .balance-list{list-style:none;margin:0;padding:0}
+    .balance-list li{display:flex;justify-content:space-between;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(255,255,255,0.02)}
+    .label{color:var(--muted);font-size:0.9rem}
+    .value{font-weight:700;color:#eaf6f8}
+    .total-row{margin-top:8px;padding:12px;border-radius:10px;background:linear-gradient(90deg,rgba(14,165,160,0.08),rgba(6,182,212,0.06));display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(14,165,160,0.12)}
+    .actions{display:flex;gap:10px;margin-top:8px}
+    .action-small{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
+    /* chart & table */
+    .chart-card{padding:12px;border-radius:10px;background:linear-gradient(180deg,#071225, #071826);border:1px solid rgba(255,255,255,0.03)}
+    .table-wrap{max-height:260px;overflow:auto;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
+    table{width:100%;border-collapse:collapse;font-size:0.92rem}
+    th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.02);color:var(--muted)}
+    th{color:var(--muted);font-weight:700;text-align:left}
+    td.right{ text-align:right;color:#eaf6f8}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted);font-weight:600;font-size:0.85rem}
+    footer{margin-top:18px;color:var(--muted);font-size:0.9rem}
   </style>
 </head>
 <body>
-  <header>
-    <h1>Bank Interface</h1>
-    <span>Advanced secured.</span>
-  </header>
+  <div class="wrap">
+    <div class="layout">
+      <!-- LOGIN -->
+      <section class="card" aria-labelledby="login-heading">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">BI</div>
+          <h1 id="login-heading">Bank Interface</h1>
+          <div class="secure-note">Advanced secured.</div>
+        </div>
 
-  <section class="login-panel" id="loginPanel">
-    <h2>Secured Login</h2>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <p>Use biometric login 🔒</p>
-  </section>
+        <div>
+          <h2 class="login-title">Secured Login</h2>
+          <form id="loginForm" autocomplete="on" novalidate>
+            <div class="form-field">
+              <label for="user">Username</label>
+              <input id="user" name="user" type="text" inputmode="text" placeholder="john.doe" required aria-required="true" />
+            </div>
 
-  <section class="dashboard hidden" id="dashboard">
-    <h2>Kiara Lords</h2>
-    <div class="account-overview">
-      <h3>Account Overview</h3>
-      <ul>
-        <li id="checking">Checking: $162,515,673.60</li>
-        <li id="premium">Premium Checking: $36,114,594.13</li>
-        <li id="savings">Savings: $36,114,594.13</li>
-        <li id="family">Family Savings: $36,114,594.13</li>
-        <li><strong id="total">Total: $270,859,456.00</strong></li>
-      </ul>
-    </div>
-    <canvas id="balanceChart"></canvas>
-    <div class="actions">
-      <button onclick="openTransfer()">Transfer Funds</button>
-      <button onclick="exportCSV()">Export</button>
-      <button onclick="logout()">Logout</button>
-    </div>
+            <div class="form-field">
+              <label for="pass">Password</label>
+              <div class="row">
+                <input id="pass" name="pass" type="password" placeholder="Enter password" required aria-required="true" />
+                <button type="button" class="show-pass" id="togglePass" aria-label="Show password">Show</button>
+              </div>
+            </div>
 
-    <h3>Transaction History</h3>
-    <table id="txTable">
-      <thead>
-        <tr>
-          <th>Date</th><th>Account</th><th>Type</th><th>Description</th>
-          <th class="right">Amount</th><th class="right">Balance After</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+            <div class="helper">
+              <label class="muted"><input id="remember" type="checkbox" /> Remember me</label>
+              <a class="muted" href="#" id="forgot">Forgot password?</a>
+            </div>
 
-  <!-- Transfer Modal -->
-  <div class="modal" id="transferModal">
-    <div class="modal-content">
-      <h3>Transfer Funds</h3>
-      <label>From:
-        <select id="fromAccount">
-          <option>Checking</option><option>Premium Checking</option>
-          <option>Savings</option><option>Family Savings</option>
-        </select>
-      </label>
-      <label>To:
-        <select id="toAccount">
-          <option>Checking</option><option>Premium Checking</option>
-          <option>Savings</option><option>Family Savings</option>
-        </select>
-      </label>
-      <label>Amount:
-        <input type="number" id="transferAmount" />
-      </label>
-      <button onclick="confirmTransfer()">Confirm</button>
-      <button onclick="closeTransfer()">Cancel</button>
+            <div style="margin-top:16px;display:flex;gap:10px">
+              <button class="btn btn-primary" type="submit">Login</button>
+              <button class="btn btn-ghost" type="button" id="biometric">Use biometric</button>
+            </div>
+
+            <div id="loginError" class="error" role="alert" style="display:none"></div>
+            <p class="muted" style="margin-top:12px">Demo: any non-empty username & password will sign in.</p>
+          </form>
+        </div>
+
+        <footer class="muted">Secure, encrypted session • Demo environment</footer>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section class="panel" id="dashboard" style="display:none">
+        <div class="card">
+          <div class="profile-row">
+            <div class="profile-left">
+              <div class="avatar" aria-hidden="true">KL</div>
+              <div>
+                <p class="cust-name" id="custName">Kiara Lords</p>
+                <p class="cust-sub">Premium customer • Member since 2016</p>
+              </div>
+            </div>
+            <div class="sec-icons">
+              <span class="pill">MFA</span>
+              <span class="pill">Encrypted</span>
+              <span class="pill">PCI compliant</span>
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:12px">
+            <div class="overview card" style="padding:14px">
+              <h3 style="margin:0 0 8px 0">Account overview</h3>
+              <ul class="balance-list" id="balanceList">
+                <li><span class="label">Checking</span><span class="value" id="b-check">$162,515,673.60</span></li>
+                <li><span class="label">Premium Checking</span><span class="value" id="b-premium">$36,114,594.13</span></li>
+                <li><span class="label">Savings</span><span class="value" id="b-savings">$36,114,594.13</span></li>
+                <li><span class="label">Family Savings</span><span class="value" id="b-family">$36,114,594.13</span></li>
+              </ul>
+              <div class="total-row"><span class="muted">Total balance</span><span class="value" id="b-total">$270,859,456.00</span></div>
+
+              <div class="actions" style="margin-top:12px">
+                <button class="btn btn-primary" id="transferBtn">Transfer funds</button>
+                <button class="action-small" id="exportBtn">Export statement</button>
+                <button class="action-small" id="logoutBtn">Logout</button>
+              </div>
+            </div>
+
+            <div class="chart-card card">
+              <canvas id="balanceChart" width="320" height="220" aria-label="Account balances chart"></canvas>
+              <p class="muted" style="margin-top:10px;text-align:center">Distribution by account</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 12px 0">Recent transactions</h3>
+          <div class="table-wrap">
+            <table aria-describedby="Recent transactions">
+              <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead>
+              <tbody id="txBody">
+                <!-- JS fills rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    let balances = {
-      "Checking": 162515673.60,
-      "Premium Checking": 36114594.13,
-      "Savings": 36114594.13,
-      "Family Savings": 36114594.13
-    };
-    let transactions = [];
+  <!-- lightweight modal for transfer (simple) -->
+  <div id="transferModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);place-items:center;display:grid">
+    <div style="width:360px;background:#081623;border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03)">
+      <h3 style="margin:0 0 10px 0">Transfer funds</h3>
+      <div style="display:grid;gap:10px">
+        <select id="fromAcc" style="padding:10px;border-radius:8px;background:#071226;color:#eaf6f8;border:none">
+          <option value="Checking">Checking</option>
+          <option value="Premium Checking">Premium Checking</option>
+          <option value="Savings">Savings</option>
+          <option value="Family Savings">Family Savings</option>
+        </select>
+        <select id="toAcc" style="padding:10px;border-radius:8px;background:#071226;color:#eaf6f8;border:none">
+          <option value="Premium Checking">Premium Checking</option>
+          <option value="Checking">Checking</option>
+          <option value="Savings">Savings</option>
+          <option value="Family Savings">Family Savings</option>
+        </select>
+        <input id="amt" type="number" min="0" step="0.01" placeholder="Amount (USD)" style="padding:10px;border-radius:8px;background:#071226;color:#eaf6f8;border:none"/>
+        <div style="display:flex;gap:8px">
+          <button id="confirmTransfer" class="btn btn-primary" style="flex:1">Confirm</button>
+          <button id="cancelTransfer" class="btn btn-ghost" style="flex:1">Cancel</button>
+        </div>
+        <div id="transferError" class="error" style="display:none"></div>
+      </div>
+    </div>
+  </div>
 
-    function login(){document.getElementById('loginPanel').classList.add('hidden');document.getElementById('dashboard').classList.remove('hidden');renderChart();renderTable();}
-    function logout(){document.getElementById('dashboard').classList.add('hidden');document.getElementById('loginPanel').classList.remove('hidden');}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    // Demo state (numeric values)
+    const state = {
+      balances: {
+        "Checking": 162515673.60,
+        "Premium Checking": 36114594.13,
+        "Savings": 36114594.13,
+        "Family Savings": 36114594.13
+      },
+      tx: [
+        {date:"2025-10-01",account:"Checking",type:"Deposit",desc:"Wire transfer",amt:50000000,bal:162515673.60},
+        {date:"2025-10-15",account:"Premium Checking",type:"Withdrawal",desc:"Property investment",amt:-5000000,bal:31114594.13},
+        {date:"2025-09-20",account:"Family Savings",type:"Withdrawal",desc:"Family expenses",amt:-2000000,bal:34114594.13}
+      ]
+    };
+
+    // ---- Login logic ----
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const dashboard = document.getElementById('dashboard');
+    loginForm.addEventListener('submit', e => {
+      e.preventDefault();
+      loginError.style.display = 'none';
+      const user = document.getElementById('user').value.trim();
+      const pass = document.getElementById('pass').value.trim();
+      if(!user || !pass){ loginError.textContent = 'Please provide username and password.'; loginError.style.display='block'; return; }
+      // Demo auth: accept any non-empty credentials
+      sessionStorage.setItem('demoUser', user);
+      showDashboard();
+    });
+
+    document.getElementById('biometric').addEventListener('click', () => {
+      // Demo biometric shortcut
+      sessionStorage.setItem('demoUser','biometric.user');
+      showDashboard();
+    });
+
+    document.getElementById('togglePass').addEventListener('click', (e) => {
+      const p = document.getElementById('pass');
+      if(p.type === 'password'){ p.type='text'; e.target.textContent='Hide'; }
+      else { p.type='password'; e.target.textContent='Show'; }
+    });
+
+    // ---- Render dashboard ----
+    let chart;
+    function showDashboard(){
+      document.querySelector('.card[aria-labelledby="login-heading"]').style.display='none';
+      dashboard.style.display='block';
+      renderBalances();
+      renderChart();
+      renderTx();
+    }
+
+    function renderBalances(){
+      document.getElementById('b-check').textContent = formatUSD(state.balances["Checking"]);
+      document.getElementById('b-premium').textContent = formatUSD(state.balances["Premium Checking"]);
+      document.getElementById('b-savings').textContent = formatUSD(state.balances["Savings"]);
+      document.getElementById('b-family').textContent = formatUSD(state.balances["Family Savings"]);
+      const total = Object.values(state.balances).reduce((s,v)=>s+v,0);
+      document.getElementById('b-total').textContent = formatUSD(total);
+      document.getElementById('custName').textContent = sessionStorage.getItem('demoUser') || 'Kiara Lords';
+    }
 
     function renderChart(){
-      const ctx=document.getElementById('balanceChart').getContext('2d');
-      new Chart(ctx,{type:'pie',data:{labels:Object.keys(balances),datasets:[{data:Object.values(balances),backgroundColor:['#22c55e','#94a3b8','#64748b','#475569']}]},options:{plugins:{legend:{labels:{color:'white'}}}}});
+      const ctx = document.getElementById('balanceChart');
+      if(chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type:'doughnut',
+        data:{
+          labels: Object.keys(state.balances),
+          datasets:[{
+            data: Object.values(state.balances),
+            backgroundColor:['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa'],
+            hoverOffset:8,
+            borderWidth:2,
+            borderColor:'#071226'
+          }]
+        },
+        options:{
+          maintainAspectRatio:false,
+          plugins:{legend:{position:'bottom',labels:{color:'#cfeff3'}}}
+        }
+      });
     }
 
-    function renderTable(){
-      const tbody=document.querySelector("#txTable tbody");tbody.innerHTML="";
-      transactions.forEach(tx=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${tx.date}</td><td>${tx.account}</td><td>${tx.type}</td><td>${tx.desc}</td>
-        <td class="right">${tx.amount.toLocaleString("en-US",{style:"currency",currency:"USD"})}</td>
-        <td class="right">${tx.after.toLocaleString("en-US",{style:"currency",currency:"USD"})}</td>`;
+    function renderTx(){
+      const tbody = document.getElementById('txBody');
+      tbody.innerHTML = '';
+      state.tx.slice().reverse().forEach(t=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${t.date}</td>
+                        <td>${t.account}</td>
+                        <td>${t.type}</td>
+                        <td>${escapeHtml(t.desc)}</td>
+                        <td class="right">${formatUSD(t.amt)}</td>
+                        <td class="right">${formatUSD(t.bal)}</td>`;
         tbody.appendChild(tr);
       });
-      updateBalances();
     }
 
-    function updateBalances(){
-      document.getElementById("checking").textContent="Checking: "+balances["Checking"].toLocaleString("en-US",{style:"currency",currency:"USD"});
-      document.getElementById("premium").textContent="Premium Checking: "+balances["Premium Checking"].toLocaleString("en-US",{style:"currency",currency:"USD"});
-      document.getElementById("savings").textContent="Savings: "+balances["Savings"].toLocaleString("en-US",{style:"currency",currency:"USD"});
-      document.getElementById("family").textContent="Family Savings: "+balances["Family Savings"].toLocaleString("en-US",{style:"currency",currency:"USD"});
-      const total=balances["Checking"]+balances["Premium Checking"]+balances["Savings"]+balances["Family Savings"];
-      document.getElementById("total").textContent="Total: "+total.toLocaleString("en-US",{style:"currency",currency:"USD"});
-    }
+    // ---- Transfers ----
+    document.getElementById('transferBtn').addEventListener('click', ()=>{ document.getElementById('transferModal').style.display='grid'; document.getElementById('transferError').style.display='none'; });
+    document.getElementById('cancelTransfer').addEventListener('click', ()=>{ document.getElementById('transferModal').style.display='none'; });
+    document.getElementById('confirmTransfer').addEventListener('click', ()=> {
+      const from = document.getElementById('fromAcc').value;
+      const to = document.getElementById('toAcc').value;
+      const amt = parseFloat(document.getElementById('amt').value);
+      const errEl = document.getElementById('transferError');
+      errEl.style.display='none';
+      if(from === to){ errEl.textContent='Choose different source and destination.'; errEl.style.display='block'; return; }
+      if(!(amt>0)){ errEl.textContent='Enter a positive amount.'; errEl.style.display='block'; return; }
+      if(state.balances[from] < amt){ errEl.textContent='Insufficient funds in source account.'; errEl.style.display='block'; return; }
+      // Update balances and transactions (demo only, local state)
+      state.balances[from] -= amt;
+      state.balances[to] += amt;
+      const now = new Date().toISOString().slice(0,10);
+      state.tx.push({date:now,account:from,type:'Transfer',desc:`Transfer to ${to}`,amt:-amt,bal:state.balances[from]});
+      state.tx.push({date:now,account:to,type:'Transfer',desc:`Transfer from ${from}`,amt:amt,bal:state.balances[to]});
+      renderBalances(); renderChart(); renderTx();
+      document.getElementById('transferModal').style.display='none';
+      document.getElementById('amt').value='';
+    });
 
-    function openTransfer(){document.getElementById("transferModal").style.display="flex";}
-    function closeTransfer(){document.getElementById("transferModal").style.display="none";}
+    // ---- Export & logout ----
+    document.getElementById('exportBtn').addEventListener('click', ()=> {
+      const rows = [['Date','Account','Type','Description','Amount','Balance']];
+      state.tx.forEach(r=>rows.push([r.date,r.account,r.type,r.desc,r.amt,r.bal]));
+      const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'}); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='statement.csv'; a.click(); URL.revokeObjectURL(url);
+    });
 
-    function confirmTransfer(){
-      const from=document.getElementById("fromAccount").value;
-      const to=document.getElementById("toAccount").value;
-      const amount=parseFloat(document.getElementById("transferAmount").value);
-      if(from===to){alert("Choose different accounts");return;}
-      if(amount<=0||isNa
+    document.getElementById('logoutBtn').addEventListener('click', ()=> {
+      sessionStorage.removeItem('demoUser');
+      location.reload();
+    });
+
+    // small helpers
+    function formatUSD(n){ return (typeof n === 'number' ? n : Number(n)).toLocaleString('en-US',{style:'currency',currency:'USD'}); }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  </script>
+</body>
+</html>
