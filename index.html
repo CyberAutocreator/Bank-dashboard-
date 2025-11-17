@@ -6,337 +6,116 @@
   <title>Secure Bank Interface</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0b1220; --card:#0f1724; --muted:#9aa4b2; --accent:#0ea5a0; --accent-2:#06b6d4;
-      --radius:12px; --border:rgba(255,255,255,0.06);
-    }
-    *{box-sizing:border-box} html,body{height:100%;margin:0;background:#0b1220;color:#eaf2f7;font-family:Inter,-apple-system,Segoe UI,Roboto,Arial}
-    .wrap{max-width:1080px;margin:36px auto;padding:0 18px}
-    .grid{display:grid;grid-template-columns:420px 1fr;gap:24px} @media(max-width:900px){.grid{grid-template-columns:1fr}}
-    .card{background:linear-gradient(180deg,#0f1724,#0a1422);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 10px 30px rgba(2,6,23,0.5);padding:22px}
-    .brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#042a2a}
-    h1{margin:0;font-size:1.05rem} .secure-note{margin-left:auto;color:var(--muted);font-size:0.85rem}
-    .login-title{margin:8px 0 12px 0;font-size:1.25rem}
-    label{display:block;color:var(--muted);font-size:0.9rem;margin-bottom:6px}
-    input, select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#0a1422;color:#eaf2f7}
-    .row{display:flex;gap:10px;align-items:center}
-    .btn{appearance:none;border:1px solid var(--border);background:#132136;color:#cfe7ea;padding:10px 12px;border-radius:10px;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#062b2b;font-weight:800;border:none}
-    .btn-ghost{background:transparent}
-    .muted{color:var(--muted)} .error{color:#ef4444;font-size:0.88rem;margin-top:6px}
-    .layout-2{display:grid;grid-template-columns:1fr 360px;gap:16px} @media(max-width:1050px){.layout-2{grid-template-columns:1fr}}
-    .balances li{display:flex;justify-content:space-between;padding:10px;border-radius:10px;border:1px solid var(--border)}
-    .value{font-weight:700} .total{display:flex;justify-content:space-between;margin-top:8px;padding:12px;border-radius:10px;background:rgba(14,165,160,0.08);border:1px solid rgba(14,165,160,0.2)}
-    table{width:100%;border-collapse:collapse;font-size:0.92rem} th,td{padding:10px;border-bottom:1px solid var(--border)} th{color:var(--muted);text-align:left} td.right{text-align:right}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);font-weight:700;font-size:0.85rem}
-    .modal{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;place-items:center}
-    .modal-card{width:360px;background:#0a1422;border:1px solid var(--border);border-radius:12px;padding:16px}
+    body{margin:0;font-family:Inter,-apple-system,Segoe UI,Roboto,Arial;background:#0b1220;color:#eaf2f7}
+    .card{background:#0f1724;border-radius:12px;padding:22px;margin:20px auto;max-width:420px;box-shadow:0 10px 30px rgba(2,6,23,0.5)}
+    input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:#0a1422;color:#eaf2f7;margin-bottom:10px}
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,#0ea5a0,#06b6d4);color:#062b2b;font-weight:700}
+    .btn-ghost{background:transparent;color:#9aa4b2;border:1px solid rgba(255,255,255,0.06)}
+    .hidden{display:none}
+    table{width:100%;border-collapse:collapse;font-size:0.9rem;margin-top:12px}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    th{color:#9aa4b2;text-align:left}
+    td.right{text-align:right}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="grid">
-      <!-- LOGIN -->
-      <section class="card" id="loginCard" aria-labelledby="loginHeading">
-        <div class="brand">
-          <div class="logo">BI</div>
-          <h1 id="loginHeading">Bank Interface</h1>
-          <div class="secure-note">Advanced secured.</div>
-        </div>
-        <h2 class="login-title">Secured login</h2>
-        <form id="loginForm" novalidate>
-          <label for="user">Username</label>
-          <input id="user" name="user" type="text" placeholder="john.doe" required>
-          <label for="pass" style="margin-top:8px">Password</label>
-          <div class="row">
-            <input id="pass" name="pass" type="password" placeholder="Enter password" required>
-            <button type="button" class="btn btn-ghost" id="togglePass">Show</button>
-          </div>
-          <div class="row" style="justify-content:space-between;margin-top:8px">
-            <label class="muted"><input id="remember" type="checkbox"> Remember me</label>
-            <span class="muted">Demo vault is encrypted with your password</span>
-          </div>
-          <div class="row" style="margin-top:12px">
-            <button class="btn btn-primary" type="submit">Login</button>
-            <button class="btn btn-ghost" type="button" id="biometric">Use biometric</button>
-          </div>
-          <div id="loginError" class="error" style="display:none"></div>
-        </form>
-      </section>
+  <!-- LOGIN -->
+  <section class="card" id="loginCard">
+    <h2>Secure Login</h2>
+    <input id="user" type="text" placeholder="Username"/>
+    <input id="pass" type="password" placeholder="Password"/>
+    <button class="btn btn-primary" onclick="login()">Login</button>
+    <div id="loginError" style="color:#ef4444;display:none"></div>
+  </section>
 
-      <!-- DASHBOARD -->
-      <section class="card" id="dashboard" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="display:flex;gap:12px;align-items:center">
-            <div class="pill">User</div>
-            <strong id="custName">Customer</strong>
-          </div>
-          <div style="display:flex;gap:8px">
-            <span class="pill">MFA</span><span class="pill">Encrypted</span><span class="pill">PCI</span>
-          </div>
-        </div>
+  <!-- DASHBOARD -->
+  <section class="card hidden" id="dashboard">
+    <h2 id="custName">Customer</h2>
+    <div id="balances"></div>
+    <button class="btn btn-primary" onclick="openTransfer()">Transfer Funds</button>
+    <button class="btn btn-ghost" onclick="exportCsv()">Export CSV</button>
+    <button class="btn btn-ghost" onclick="logout()">Logout</button>
+    <h3>Transactions</h3>
+    <table>
+      <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead>
+      <tbody id="txBody"></tbody>
+    </table>
+  </section>
 
-        <div class="layout-2">
-          <div class="card" style="padding:14px">
-            <h3 style="margin:0 0 8px 0">Account overview</h3>
-            <ul class="balances" style="list-style:none;margin:0;padding:0" id="balanceList">
-              <li><span class="muted">Checking</span><span class="value" id="b-check">$0.00</span></li>
-              <li><span class="muted">Premium Checking</span><span class="value" id="b-premium">$0.00</span></li>
-              <li><span class="muted">Savings</span><span class="value" id="b-savings">$0.00</span></li>
-              <li><span class="muted">Family Savings</span><span class="value" id="b-family">$0.00</span></li>
-            </ul>
-            <div class="total"><span class="muted">Total balance</span><span class="value" id="b-total">$0.00</span></div>
-            <div class="row" style="margin-top:12px">
-              <button class="btn btn-primary" id="transferBtn">Transfer funds</button>
-              <button class="btn" id="exportCsvBtn">Export CSV</button>
-              <button class="btn" id="exportEncBtn">Export encrypted</button>
-              <button class="btn" id="logoutBtn">Logout</button>
-            </div>
-          </div>
+  <!-- Transfer Modal -->
+  <section class="card hidden" id="transferCard">
+    <h3>Transfer Funds</h3>
+    <select id="fromAcc"></select>
+    <select id="toAcc"></select>
+    <input id="amt" type="number" placeholder="Amount"/>
+    <button class="btn btn-primary" onclick="confirmTransfer()">Confirm</button>
+    <button class="btn btn-ghost" onclick="closeTransfer()">Cancel</button>
+    <div id="transferError" style="color:#ef4444;display:none"></div>
+  </section>
 
-          <div class="card">
-            <canvas id="balanceChart" width="320" height="220" aria-label="Account balances chart"></canvas>
-            <p class="muted" style="margin-top:10px;text-align:center">Distribution by account</p>
-          </div>
-        </div>
+<script>
+const API = "https://your-backend.onrender.com"; // replace with your Render backend URL
+let token = null;
+let accountsCache = [];
 
-        <div class="card" style="margin-top:16px">
-          <h3 style="margin:0 0 10px 0">Recent transactions</h3>
-          <div style="max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:10px">
-            <table>
-              <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr></thead>
-              <tbody id="txBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
+async function login(){
+  const username = document.getElementById('user').value.trim();
+  const password = document.getElementById('pass').value.trim();
+  try{
+    const res = await fetch(API+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})});
+    if(!res.ok) throw new Error("Invalid credentials");
+    const data = await res.json();
+    token = data.token;
+    document.getElementById('custName').textContent = username;
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    loadDashboard();
+  }catch(e){ document.getElementById('loginError').textContent=e.message; document.getElementById('loginError').style.display='block'; }
+}
 
-  <!-- Transfer modal -->
-  <div class="modal" id="transferModal">
-    <div class="modal-card">
-      <h3 style="margin:0 0 10px 0">Transfer funds</h3>
-      <label for="fromAcc">From account</label>
-      <select id="fromAcc">
-        <option>Checking</option><option>Premium Checking</option><option>Savings</option><option>Family Savings</option>
-      </select>
-      <label for="toAcc" style="margin-top:8px">To account</label>
-      <select id="toAcc">
-        <option>Premium Checking</option><option>Checking</option><option>Savings</option><option>Family Savings</option>
-      </select>
-      <label for="amt" style="margin-top:8px">Amount (USD)</label>
-      <input id="amt" type="number" min="0" step="0.01" placeholder="0.00">
-      <div class="row" style="margin-top:12px">
-        <button class="btn btn-primary" id="confirmTransfer">Confirm</button>
-        <button class="btn btn-ghost" id="cancelTransfer">Cancel</button>
-      </div>
-      <div id="transferError" class="error" style="display:none"></div>
-    </div>
-  </div>
+async function loadDashboard(){
+  const balRes = await fetch(API+"/api/balances",{headers:{Authorization:"Bearer "+token}});
+  const {accounts} = await balRes.json();
+  accountsCache = accounts;
+  const balancesDiv = document.getElementById('balances'); balancesDiv.innerHTML="";
+  let total=0;
+  accounts.forEach(a=>{ balancesDiv.innerHTML+=`<div>${a.name}: ${formatUSD(a.balance)}</div>`; total+=a.balance; });
+  balancesDiv.innerHTML+=`<strong>Total: ${formatUSD(total)}</strong>`;
+  const txRes = await fetch(API+"/api/transactions",{headers:{Authorization:"Bearer "+token}});
+  const {transactions} = await txRes.json();
+  const tbody=document.getElementById('txBody'); tbody.innerHTML="";
+  transactions.forEach(t=>{
+    tbody.innerHTML+=`<tr><td>${new Date(t.date).toISOString().slice(0,10)}</td><td>${t.accountId}</td><td>${t.type}</td><td>${escapeHtml(t.description)}</td><td class="right">${formatUSD(t.amount)}</td><td class="right">${formatUSD(t.balanceAfter)}</td></tr>`;
+  });
+}
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
-    // ---------- Crypto helpers (AES-GCM + PBKDF2 via Web Crypto) ----------
-    const VAULT_KEY = 'bank.vault'; // localStorage key
-    const ENCODER = new TextEncoder(), DECODER = new TextDecoder();
+function openTransfer(){
+  const fromSel=document.getElementById('fromAcc'); const toSel=document.getElementById('toAcc');
+  fromSel.innerHTML=""; toSel.innerHTML="";
+  accountsCache.forEach(a=>{ fromSel.innerHTML+=`<option value="${a.id}">${a.name}</option>`; toSel.innerHTML+=`<option value="${a.id}">${a.name}</option>`; });
+  document.getElementById('transferCard').classList.remove('hidden');
+}
+function closeTransfer(){ document.getElementById('transferCard').classList.add('hidden'); }
 
-    async function deriveKey(password, saltBytes){
-      const baseKey = await crypto.subtle.importKey('raw', ENCODER.encode(password), 'PBKDF2', false, ['deriveKey']);
-      return crypto.subtle.deriveKey(
-        { name:'PBKDF2', salt:saltBytes, iterations:100000, hash:'SHA-256' },
-        baseKey,
-        { name:'AES-GCM', length:256 },
-        false,
-        ['encrypt','decrypt']
-      );
-    }
-    async function encryptVault(password, obj){
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await deriveKey(password, salt);
-      const plaintext = ENCODER.encode(JSON.stringify(obj));
-      const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, plaintext));
-      const payload = { salt: btoa(String.fromCharCode(...salt)), iv: btoa(String.fromCharCode(...iv)), data: btoa(String.fromCharCode(...ciphertext)) };
-      localStorage.setItem(VAULT_KEY, JSON.stringify(payload));
-      return payload;
-    }
-    async function decryptVault(password){
-      const raw = localStorage.getItem(VAULT_KEY);
-      if(!raw) return null;
-      const payload = JSON.parse(raw);
-      const salt = Uint8Array.from(atob(payload.salt), c=>c.charCodeAt(0));
-      const iv = Uint8Array.from(atob(payload.iv), c=>c.charCodeAt(0));
-      const data = Uint8Array.from(atob(payload.data), c=>c.charCodeAt(0));
-      const key = await deriveKey(password, salt);
-      try{
-        const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, data);
-        return JSON.parse(DECODER.decode(new Uint8Array(plain)));
-      }catch(e){
-        return null; // wrong password or tampered data
-      }
-    }
+async function confirmTransfer(){
+  const fromId=document.getElementById('fromAcc').value;
+  const toId=document.getElementById('toAcc').value;
+  const amount=Number(document.getElementById('amt').value);
+  try{
+    const res=await fetch(API+"/api/transfer",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({fromId,toId,amount})});
+    if(!res.ok) throw new Error((await res.json()).error);
+    await loadDashboard();
+    closeTransfer();
+  }catch(e){ document.getElementById('transferError').textContent=e.message; document.getElementById('transferError').style.display='block'; }
+}
 
-    // ---------- Demo initial data ----------
-    const INITIAL_STATE = {
-      balances: {
-        "Checking": 162_515_673.60,
-        "Premium Checking": 36_114_594.13,
-        "Savings": 36_114_594.13,
-        "Family Savings": 36_114_594.13
-      },
-      tx: [
-        {date:"2025-10-01",account:"Checking",type:"Deposit",desc:"Wire transfer",amt:50_000_000,bal:162_515_673.60},
-        {date:"2025-10-15",account:"Premium Checking",type:"Withdrawal",desc:"Property investment",amt:-5_000_000,bal:31_114_594.13},
-        {date:"2025-09-20",account:"Family Savings",type:"Withdrawal",desc:"Family expenses",amt:-2_000_000,bal:34_114_594.13}
-      ],
-      user: null
-    };
-
-    // ---------- UI / state ----------
-    let runtime = null; // decrypted state in memory
-    const loginForm = document.getElementById('loginForm');
-    const loginError = document.getElementById('loginError');
-    const loginCard = document.getElementById('loginCard');
-    const dashboard = document.getElementById('dashboard');
-
-    document.getElementById('togglePass').addEventListener('click', (e)=>{
-      const p = document.getElementById('pass');
-      if(p.type === 'password'){ p.type='text'; e.target.textContent='Hide'; } else { p.type='password'; e.target.textContent='Show'; }
-    });
-
-    document.getElementById('biometric').addEventListener('click', async ()=>{
-      const user = document.getElementById('user').value.trim() || 'biometric.user';
-      const pass = 'biometric-pass'; // demo-only shortcut
-      await ensureVault(pass, user);
-      await unlock(pass, user);
-    });
-
-    loginForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      loginError.style.display = 'none';
-      const user = document.getElementById('user').value.trim();
-      const pass = document.getElementById('pass').value.trim();
-      if(!user || !pass){ loginError.textContent = 'Enter username and password.'; loginError.style.display = 'block'; return; }
-      await ensureVault(pass, user);
-      const ok = await unlock(pass, user);
-      if(!ok){ loginError.textContent = 'Invalid password or data corrupted.'; loginError.style.display = 'block'; }
-    });
-
-    async function ensureVault(password, user){
-      // If no vault exists, create one encrypted with this password
-      if(!localStorage.getItem(VAULT_KEY)){
-        const init = structuredClone(INITIAL_STATE);
-        init.user = user;
-        await encryptVault(password, init);
-      }
-    }
-
-    async function unlock(password, user){
-      const data = await decryptVault(password);
-      if(!data) return false;
-      runtime = data;
-      runtime.user = user; // set current session user display
-      showDashboard();
-      return true;
-    }
-
-    function showDashboard(){
-      loginCard.style.display = 'none';
-      dashboard.style.display = 'block';
-      document.getElementById('custName').textContent = runtime.user || 'Customer';
-      renderBalances();
-      renderChart();
-      renderTx();
-    }
-
-    function formatUSD(n){ return Number(n).toLocaleString('en-US',{style:'currency',currency:'USD'}); }
-
-    function renderBalances(){
-      document.getElementById('b-check').textContent   = formatUSD(runtime.balances["Checking"]);
-      document.getElementById('b-premium').textContent = formatUSD(runtime.balances["Premium Checking"]);
-      document.getElementById('b-savings').textContent = formatUSD(runtime.balances["Savings"]);
-      document.getElementById('b-family').textContent  = formatUSD(runtime.balances["Family Savings"]);
-      const total = Object.values(runtime.balances).reduce((s,v)=>s+v,0);
-      document.getElementById('b-total').textContent = formatUSD(total);
-    }
-
-    let chart;
-    function renderChart(){
-      const ctx = document.getElementById('balanceChart');
-      if(chart) chart.destroy();
-      chart = new Chart(ctx, {
-        type:'doughnut',
-        data:{
-          labels:Object.keys(runtime.balances),
-          datasets:[{ data:Object.values(runtime.balances), backgroundColor:['#06b6d4','#0ea5a0','#7dd3fc','#60a5fa'], borderColor:'#0a1422', borderWidth:2 }]
-        },
-        options:{ plugins:{ legend:{ position:'bottom', labels:{ color:'#cfeff3' } } } }
-      });
-    }
-
-    function renderTx(){
-      const tbody = document.getElementById('txBody');
-      tbody.innerHTML = '';
-      runtime.tx.slice().reverse().forEach(t=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${t.date}</td><td>${t.account}</td><td>${t.type}</td><td>${escapeHtml(t.desc)}</td><td class="right">${formatUSD(t.amt)}</td><td class="right">${formatUSD(t.bal)}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Transfer flow
-    const transferModal = document.getElementById('transferModal');
-    document.getElementById('transferBtn').addEventListener('click', ()=>{ transferModal.style.display='grid'; document.getElementById('transferError').style.display='none'; });
-    document.getElementById('cancelTransfer').addEventListener('click', ()=>{ transferModal.style.display='none'; });
-    document.getElementById('confirmTransfer').addEventListener('click', async ()=>{
-      const from = document.getElementById('fromAcc').value;
-      const to   = document.getElementById('toAcc').value;
-      const amt  = parseFloat(document.getElementById('amt').value);
-      const err  = document.getElementById('transferError');
-      err.style.display='none';
-      if(from === to){ err.textContent='Choose different accounts.'; err.style.display='block'; return; }
-      if(!(amt>0)){ err.textContent='Enter a positive amount.'; err.style.display='block'; return; }
-      if(runtime.balances[from] < amt){ err.textContent='Insufficient funds.'; err.style.display='block'; return; }
-      runtime.balances[from] -= amt;
-      runtime.balances[to] += amt;
-      const today = new Date().toISOString().slice(0,10);
-      runtime.tx.push({date:today,account:from,type:'Transfer',desc:`Transfer to ${to}`,amt:-amt,bal:runtime.balances[from]});
-      runtime.tx.push({date:today,account:to,type:'Transfer',desc:`Transfer from ${from}`,amt:amt,bal:runtime.balances[to]});
-      persist(); renderBalances(); renderChart(); renderTx();
-      transferModal.style.display='none'; document.getElementById('amt').value='';
-    });
-
-    // Export
-    document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
-      const rows = [['Date','Account','Type','Description','Amount','Balance'], ...runtime.tx.map(r=>[r.date,r.account,r.type,r.desc,r.amt,r.bal])];
-      const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-      downloadBlob(new Blob([csv],{type:'text/csv'}),'statement.csv');
-    });
-    document.getElementById('exportEncBtn').addEventListener('click', async ()=>{
-      const pass = document.getElementById('pass').value.trim() || 'biometric-pass';
-      const payload = await encryptVault(pass, runtime);
-      downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'encrypted-vault.json');
-      // Re-save vault (already done by encryptVault) to keep ciphertext current
-    });
-
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', ()=>{
-      runtime = null;
-      document.getElementById('pass').value = '';
-      dashboard.style.display = 'none';
-      loginCard.style.display = 'block';
-    });
-
-    function persist(){
-      const pass = document.getElementById('pass').value.trim() || 'biometric-pass';
-      encryptVault(pass, runtime); // re-encrypt and store
-    }
-    function downloadBlob(blob, name){
-      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url);
-    }
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  </script>
+function exportCsv(){
+  window.open(API+"/api/transactions?format=csv","_blank");
+}
+function logout(){ token=null; document.getElementById('dashboard').classList.add('hidden'); document.getElementById('loginCard').classList.remove('hidden'); }
+function formatUSD(n){ return Number(n).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
 </body>
 </html>
